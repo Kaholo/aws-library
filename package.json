@@ -19,12 +19,14 @@
     "url": "https://github.com/Kaholo/aws-plugin/issues"
   },
   "homepage": "https://github.com/Kaholo/aws-plugin#readme",
-  "dependencies": {
-    "aws-sdk": "^2.1072.0",
-    "lodash": "^4.17.21",
+  "devDependencies": {
     "eslint": "^8.8.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.25.4",
     "jest": "^27.5.0"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.1072.0",
+    "lodash": "^4.17.21"
   }
 }
