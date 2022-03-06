@@ -9,27 +9,27 @@ function removeCredentials(params, labels = consts.DEFAULT_CREDENTIAL_LABELS) {
 function loadConfiguration() {
   try {
     // eslint-disable-next-line global-require
-    return require("../../../config.json");
+    return require("../../config.json");
   } catch (exception) {
     console.error(exception);
     throw new Error("Could not retrieve the plugin configuration");
   }
 }
 
-function readRegion(params, settings, label = consts.DEFAULT_CREDENTIAL_LABELS[2]) {
+function readRegion(params, settings, label = consts.DEFAULT_CREDENTIAL_LABELS.REGION) {
   return parsers.autocomplete(params[label]) || parsers.autocomplete(settings[label]);
 }
 
 function readCredentials(params, settings, labels = consts.DEFAULT_CREDENTIAL_LABELS) {
   return {
-    accessKeyId: parsers.string(params[labels[0]]) || parsers.string(settings[labels[0]]),
-    secretAccessKey: parsers.string(params[labels[1]]) || parsers.string(settings[labels[1]]),
+    accessKeyId: parsers.string(params[labels.ACCESS_KEY]) || parsers.string(settings[labels.ACCESS_KEY]),
+    secretAccessKey: parsers.string(params[labels.SECRET_KEY]) || parsers.string(settings[labels.SECRET_KEY]),
     region: readRegion(params, settings),
   };
 }
 
 function removeUndefinedAndEmpty(object) {
-  return _.omitBy(object, (v) => _.isNil(v) || (_.isObjectLike(v) && _.isEmpty(v)));
+  return _.omitBy(object, (value) => _.isNil(value) || (_.isObjectLike(value) && _.isEmpty(value)));
 }
 
 function tryParseJson(value) {
@@ -91,7 +91,7 @@ function convertActionForAnotherMethodCall(methodName, action, additionalParams 
   };
 }
 
-function handleTagSpecification(resourceType, tags) {
+function buildTagSpecification(resourceType, tags) {
   const unparsedTags = !_.isArray(tags) ? [tags] : tags;
 
   if (_.isEmpty(_.compact(unparsedTags))) { return []; }
@@ -108,6 +108,6 @@ module.exports = {
   readRegion,
   readCredentials,
   readActionArguments,
-  handleTagSpecification,
+  buildTagSpecification,
   convertActionForAnotherMethodCall,
 };

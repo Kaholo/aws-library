@@ -1,6 +1,10 @@
 {
-  "MISSING_OR_INCORRECT_CREDENTIALS_ERROR": "Missing or incorrect credentials - please select valid access and secret keys first",
-  "DEFAULT_CREDENTIAL_LABELS": ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "REGION"],
+  "MISSING_OR_INCORRECT_CREDENTIALS_ERROR_MESSAGE": "Missing or incorrect credentials - please select valid access and secret keys first",
+  "DEFAULT_CREDENTIAL_LABELS": {
+    "ACCESS_KEY": "AWS_ACCESS_KEY_ID",
+    "SECRET_KEY": "AWS_SECRET_ACCESS_KEY",
+    "REGION": "REGION"
+  },
   "MAX_AUTOCOMPLETE_RESULTS": 100,
   "ALL_AWS_REGIONS": [
     { "regionId": "us-east-2", "regionLabel": "US East (Ohio)" },

@@ -19,7 +19,7 @@ function handleInput(awsService, action, settings, overrideParsers = {}) {
   };
 }
 
-function mapToAws(service, functionName, payloadFunction = null) {
+function mapToAwsMethod(service, functionName, payloadFunction = null) {
   return (action, settings) => {
     const { client, region, params } = handleInput(service, action, settings);
     const payload = helpers.removeUndefinedAndEmpty(
@@ -34,5 +34,5 @@ function mapToAws(service, functionName, payloadFunction = null) {
 module.exports = {
   handleInput,
   getServiceInstance,
-  mapToAws,
+  mapToAwsMethod,
 };
