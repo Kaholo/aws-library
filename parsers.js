@@ -17,7 +17,7 @@ function number(value) {
     return value;
   }
   if (_.isNumber(parseFloat(value)) && !_.isNaN(parseFloat(value))) {
-    return parseInt(value);
+    return parseFloat(value);
   }
   throw new Error(`Value ${value} is not a valid number`);
 }
