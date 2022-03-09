@@ -15,10 +15,11 @@ function mapAutocompleteFuncParamsToObject(params) {
   }), {});
 }
 
-function filterItemsByQuery(autocompleteItems, query) {
-  const sliceAndSortItems =
-    (items) => _.sortBy(items.slice(0, consts.MAX_AUTOCOMPLETE_RESULTS), ["value"]);
+function sliceAndSortItems(items) {
+  return _.sortBy(items.slice(0, consts.MAX_AUTOCOMPLETE_RESULTS), ["value"]);
+}
 
+function filterItemsByQuery(autocompleteItems, query) {
   if (!query) { return sliceAndSortItems(autocompleteItems); }
 
   const queryWords = query.split(/[. ]/g).map(_.toLower);
