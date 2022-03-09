@@ -13,16 +13,18 @@ function object(value) {
 }
 
 function number(value) {
-  if (_.isNumber(value) && !_.isNaN(value)) {
+  const validNumber = (value) => _.isNumber(value) && _.isFinite(value) && !_.isNaN(value);
+  if (validNumber(value)) {
     return value;
   }
-  if (_.isNumber(parseFloat(value)) && !_.isNaN(parseFloat(value))) {
+  if (validNumber(parseFloat(value))) {
     return parseFloat(value);
   }
   throw new Error(`Value ${value} is not a valid number`);
 }
 
 function boolean(value) {
+  if (_.isNil(value)) { return false; }
   if (_.isBoolean(value)) { return value; }
   if (_.isString(value) && _.isEmpty(value)) { return false; }
   if (
@@ -35,7 +37,7 @@ function boolean(value) {
 }
 
 function string(value) {
-  if (_.isNil(value) || _.isEmpty(value)) { return ""; }
+  if (_.isNil(value)) { return ""; }
   if (_.isString(value)) { return value; }
   throw new Error(`Value ${value} is not a valid string`);
 }
@@ -70,7 +72,7 @@ function tag(value) {
   if (_.isString(value)) {
     const [Key, Value] = value.split(/=(.+)/);
     if (!_.isEmpty(Key) && !_.isEmpty(Value)) {
-      return { Key, Value };
+      return { Key: Key.trim(), Value: Value.trim() };
     }
     throw new Error(`Incorrectly formatted tag string: ${value}`);
   }
@@ -98,7 +100,7 @@ function tags(value) {
   }
   if (_.isObject(value)) {
     if (isTagObject(value)) { return value; }
-    return _.entries(value).map(([Key, Value]) => ({ Key, Value }));
+    return _.entries(value).map(([Key, Value]) => ({ Key: Key.trim(), Value: Value.trim()}));
   }
   throw new Error("Unsupported tags format!");
 }

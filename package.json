@@ -2,9 +2,9 @@
   "name": "kaholo-aws-plugin",
   "version": "1.0.0",
   "description": "Kaholo npm package for aws plugins",
-  "main": "core.js",
+  "main": "aws-plugin.js",
   "scripts": {
-    "test": "npx jest .",
+    "test": "jest",
     "lint": "npx eslint .",
     "lint:fix": "npx eslint . --fix"
   },

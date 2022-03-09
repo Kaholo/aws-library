@@ -1,13 +1,12 @@
 const _ = require("lodash");
 const parsers = require("./parsers");
-const core = require("./core");
 const consts = require("./consts.json");
 
 /**
  * @param params: [ { value: any, name: string, type: string } ]
  * Array of values passed to autocomplete function as action parameters.
  */
-function parseActionParameters(params) {
+function mapAutocompleteFuncParamsToObject(params) {
   return params.reduce((acc, {
     value, name, type, valueType,
   }) => ({
@@ -16,36 +15,29 @@ function parseActionParameters(params) {
   }), {});
 }
 
-function handleInput(awsService, actionParams, pluginSettings) {
-  const [params, settings] = [actionParams, pluginSettings].map(parseActionParameters);
-  const client = core.getServiceInstance(awsService, params, settings);
-  return { params, settings, client };
-}
+function filterItemsByQuery(autocompleteItems, query) {
+  const sliceAndSortItems =
+    (items) => _.sortBy(items.slice(0, consts.MAX_AUTOCOMPLETE_RESULTS), ["value"]);
 
-function itemsFilter(autocompleteItems, query) {
-  if (query) {
-    const queryWords = query.split(/[. ]/g).map(_.toLower);
-    const wordInValue = (value, word) => value.toLowerCase().includes(word);
-    const filteredResult = autocompleteItems.filter((item) =>
-      queryWords.every(
-        (word) => wordInValue(item.value, word)
-      ));
+  if (!query) { return sliceAndSortItems(autocompleteItems); }
 
-    return _.sortBy(filteredResult, ["value"]);
-  }
-  return _.sortBy(
-    autocompleteItems.slice(0, consts.MAX_AUTOCOMPLETE_RESULTS),
-    ["value"]);
+  const queryWords = query.split(/[. ]/g).map(_.toLower);
+  const filteredResult = autocompleteItems.filter((item) => {
+    const wordIsPresentInValue = (word) => item.value.toLowerCase().includes(word);
+    return queryWords.every(wordIsPresentInValue);
+  });
+
+  return sliceAndSortItems(filteredResult);
 }
 
 function autocompleteListFromAwsCall(awsService, listFuncName, pathToArray, pathToValue) {
   return async (query, pluginSettings, actionParams) => {
     const { client } = handleInput(awsService, actionParams, pluginSettings);
     const response = await client[listFuncName]().promise();
-    const result = _.get(response, pathToArray)
-      .map((object) => itemFromValue(_.get(object, pathToValue)));
+    const autocompleteItems = _.get(response, pathToArray)
+      .map((object) => toAutocompleteItemFromPrimitive(_.get(object, pathToValue)));
 
-    return itemsFilter(result, query);
+    return filterItemsByQuery(autocompleteItems, query);
   }
 }
 
@@ -55,10 +47,10 @@ function listRegions(query = "") {
     value: `${regionId} - ${regionLabel}`,
   }));
 
-  return itemsFilter(autocompleteList, query);
+  return filterItemsByQuery(autocompleteList, query);
 }
 
-function itemFromValue(value, label = value) {
+function toAutocompleteItemFromPrimitive(value, label = value) {
   return {
     id: value,
     value: label,
@@ -70,11 +62,10 @@ function getRegionLabel(regionId) {
 }
 
 module.exports = {
-  parseActionParameters,
-  handleInput,
+  mapAutocompleteFuncParamsToObject,
   listRegions,
   getRegionLabel,
-  itemFromValue,
+  toAutocompleteItemFromPrimitive,
   autocompleteListFromAwsCall,
-  itemsFilter,
+  filterItemsByQuery,
 };

@@ -48,7 +48,6 @@ function loadMethodFromConfiguration(methodName) {
 
 function readActionArguments(
   action,
-  overrideParsers = {},
   credentialLabels = consts.DEFAULT_CREDENTIAL_LABELS,
 ) {
   const method = loadMethodFromConfiguration(action.method.name);
@@ -67,7 +66,7 @@ function readActionArguments(
       return;
     }
 
-    const parserToUse = overrideParsers[paramDefinition.name] || paramDefinition.type;
+    const parserToUse = paramDefinition.parser || paramDefinition.type;
     paramValues[paramDefinition.name] = parsers.resolveParser(parserToUse)(value);
   });
   return removeCredentials(paramValues, credentialLabels);
