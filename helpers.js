@@ -3,7 +3,7 @@ const parsers = require("./parsers");
 const consts = require("./consts.json");
 
 function removeCredentials(params, labels = consts.DEFAULT_CREDENTIAL_LABELS) {
-  return { ..._.omit(params, labels) };
+  return { ..._.omit(params, _.values(labels)) };
 }
 
 function loadConfiguration() {
@@ -46,6 +46,19 @@ function loadMethodFromConfiguration(methodName) {
   return config.methods.find((m) => m.name === methodName);
 }
 
+function parseMethodParameter(paramDefinition, value) {
+  const valueToParse = value || paramDefinition.default;
+  if (_.isNil(valueToParse)) {
+    if (paramDefinition.required) {
+      throw Error(`Missing required "${paramDefinition.name}" value`);
+    }
+    return valueToParse;
+  }
+
+  const parserToUse = paramDefinition.parserType || paramDefinition.type;
+  return parsers.resolveParser(parserToUse)(value);
+}
+
 function readActionArguments(
   action,
   credentialLabels = consts.DEFAULT_CREDENTIAL_LABELS,
@@ -58,36 +71,27 @@ function readActionArguments(
   }
 
   method.params.forEach((paramDefinition) => {
-    const value = paramValues[paramDefinition.name] || paramDefinition.default;
-    if (_.isNil(value)) {
-      if (paramDefinition.required) {
-        throw new Error(`Missing required "${paramDefinition.name}" value`);
-      }
-      return;
-    }
-
-    const parserToUse = paramDefinition.parser || paramDefinition.type;
-    paramValues[paramDefinition.name] = parsers.resolveParser(parserToUse)(value);
+    paramValues[paramDefinition.name] = parseMethodParameter(
+      paramDefinition,
+      paramValues[paramDefinition.name],
+    );
   });
   return removeCredentials(paramValues, credentialLabels);
 }
 
-function convertActionForAnotherMethodCall(methodName, action, additionalParams = {}) {
-  const method = loadMethodFromConfiguration(methodName);
-  const params = _.merge(...(method.params.map((param) => ({ [param.name]: _.isNil(param.default) ? "" : param.default }))));
-  _.keys(_.merge(action.params, additionalParams)).forEach((key) => {
-    if (_.has(params, key)) {
-      params[key] = action.params[key];
-    }
-  });
+function prepareParametersForAnotherMethodCall(methodName, params, additionalParams = {}) {
+  const methodDefinition = loadMethodFromConfiguration(methodName);
+  if (_.isNil(methodDefinition)) { throw new Error(`No method "${methodName}" found in config!`); }
+  return _.entries(_.merge(params, additionalParams))
+    .reduce((methodParameters, [key, value]) => {
+      const paramDefinition = _.find(methodDefinition.params, { name: key });
+      if (_.isNil(paramDefinition)) { return methodParameters; }
 
-  return {
-    ...action,
-    method: {
-      name: methodName,
-    },
-    params,
-  };
+      return {
+        ...methodParameters,
+        [key]: parseMethodParameter(paramDefinition, value),
+      };
+    }, {});
 }
 
 function buildTagSpecification(resourceType, tags) {
@@ -108,5 +112,5 @@ module.exports = {
   readCredentials,
   readActionArguments,
   buildTagSpecification,
-  convertActionForAnotherMethodCall,
+  prepareParametersForAnotherMethodCall,
 };
