@@ -31,15 +31,21 @@ function filterItemsByQuery(autocompleteItems, query) {
   return sliceAndSortItems(filteredResult);
 }
 
-function autocompleteListFromAwsCall(awsService, listFuncName, pathToArray, pathToValue) {
-  return async (query, pluginSettings, actionParams) => {
-    const { client } = handleInput(awsService, actionParams, pluginSettings);
+function toAutocompleteItemFromPrimitive(value, label = value) {
+  return {
+    id: value,
+    value: label,
+  };
+}
+
+function autocompleteListFromAwsCall(listFuncName, pathToArray, pathToValue) {
+  return async (query, params, client) => {
     const response = await client[listFuncName]().promise();
     const autocompleteItems = _.get(response, pathToArray)
       .map((object) => toAutocompleteItemFromPrimitive(_.get(object, pathToValue)));
 
     return filterItemsByQuery(autocompleteItems, query);
-  }
+  };
 }
 
 function listRegions(query = "") {
@@ -49,13 +55,6 @@ function listRegions(query = "") {
   }));
 
   return filterItemsByQuery(autocompleteList, query);
-}
-
-function toAutocompleteItemFromPrimitive(value, label = value) {
-  return {
-    id: value,
-    value: label,
-  };
 }
 
 function getRegionLabel(regionId) {
