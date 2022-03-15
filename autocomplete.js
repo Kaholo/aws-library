@@ -15,8 +15,27 @@ function mapAutocompleteFuncParamsToObject(params) {
   }), {});
 }
 
-function sliceAndSortItems(items) {
-  return _.sortBy(items.slice(0, consts.MAX_AUTOCOMPLETE_RESULTS), ["value"]);
+function listRegions(query = "") {
+  const autocompleteList = consts.ALL_AWS_REGIONS.map(({ regionId, regionLabel }) => ({
+    id: regionId,
+    value: `${regionId} - ${regionLabel}`,
+  }));
+
+  return filterItemsByQuery(autocompleteList, query);
+}
+
+function getRegionLabel(regionId) {
+  return consts.ALL_AWS_REGIONS.find((region) => region.regionId === regionId).regionLabel;
+}
+
+function autocompleteListFromAwsCall(listFuncName, pathToArray, pathToValue) {
+  return async (query, params, client) => {
+    const response = await client[listFuncName]().promise();
+    const autocompleteItems = _.get(response, pathToArray)
+      .map((object) => toAutocompleteItemFromPrimitive(_.get(object, pathToValue)));
+
+    return filterItemsByQuery(autocompleteItems, query);
+  };
 }
 
 function filterItemsByQuery(autocompleteItems, query) {
@@ -38,34 +57,15 @@ function toAutocompleteItemFromPrimitive(value, label = value) {
   };
 }
 
-function autocompleteListFromAwsCall(listFuncName, pathToArray, pathToValue) {
-  return async (query, params, client) => {
-    const response = await client[listFuncName]().promise();
-    const autocompleteItems = _.get(response, pathToArray)
-      .map((object) => toAutocompleteItemFromPrimitive(_.get(object, pathToValue)));
-
-    return filterItemsByQuery(autocompleteItems, query);
-  };
-}
-
-function listRegions(query = "") {
-  const autocompleteList = consts.ALL_AWS_REGIONS.map(({ regionId, regionLabel }) => ({
-    id: regionId,
-    value: `${regionId} - ${regionLabel}`,
-  }));
-
-  return filterItemsByQuery(autocompleteList, query);
-}
-
-function getRegionLabel(regionId) {
-  return consts.ALL_AWS_REGIONS.find((region) => region.regionId === regionId).regionLabel;
+function sliceAndSortItems(items) {
+  return _.sortBy(items.slice(0, consts.MAX_AUTOCOMPLETE_RESULTS), ["value"]);
 }
 
 module.exports = {
   mapAutocompleteFuncParamsToObject,
   listRegions,
   getRegionLabel,
-  toAutocompleteItemFromPrimitive,
   autocompleteListFromAwsCall,
   filterItemsByQuery,
+  toAutocompleteItemFromPrimitive,
 };

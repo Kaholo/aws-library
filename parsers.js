@@ -17,8 +17,10 @@ function number(value) {
   if (validNumber(value)) {
     return value;
   }
-  if (validNumber(parseFloat(value))) {
-    return parseFloat(value);
+
+  const floatValue = parseFloat(value);
+  if (validNumber(floatValue)) {
+    return floatValue;
   }
   throw new Error(`Value ${value} is not a valid number`);
 }
@@ -26,12 +28,10 @@ function number(value) {
 function boolean(value) {
   if (_.isNil(value)) { return false; }
   if (_.isBoolean(value)) { return value; }
-  if (_.isString(value) && _.isEmpty(value)) { return false; }
-  if (
-    _.isString(value)
-    && _.includes(["true", "false"], value.toLowerCase().trim())
-  ) {
-    return value.toLowerCase().trim() === "true";
+  if (_.isString(value)) {
+    const stringValue = value.toLowerCase().trim();
+    if (["", "false"].includes(stringValue)) { return false; }
+    if (stringValue === "true") { return true; }
   }
   throw new Error(`Value ${value} is not of type boolean`);
 }
@@ -71,7 +71,7 @@ function tag(value) {
 
   if (_.isString(value)) {
     const [Key, Value] = value.split(/=(.+)/);
-    if (!_.isEmpty(Key) && !_.isEmpty(Value)) {
+    if (Key.trim() !== "" && Value.trim() !== "") {
       return { Key: Key.trim(), Value: Value.trim() };
     }
     throw new Error(`Incorrectly formatted tag string: ${value}`);
