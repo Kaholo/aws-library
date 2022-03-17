@@ -7,19 +7,25 @@ const consts = require("./consts.json");
  * Array of values passed to autocomplete function as action parameters.
  */
 function mapAutocompleteFuncParamsToObject(params) {
+  if (!_.isArray(params) || !_.every(params, _.isObject)) {
+    throw new Error("Cannot map parameters for autocomplete function - incorrect format");
+  }
   return params.reduce((acc, {
     value, name, type, valueType,
-  }) => ({
-    ...acc,
-    [name]: parsers.resolveParser(type || valueType)(value),
-  }), {});
+  }) => {
+    if ([value, name, type || valueType].some(_.isNil)) {
+      throw new Error("Cannot map parameters for autocomplete function - some of the parameters are missing required fields");
+    }
+    return {
+      ...acc,
+      [name]: parsers.resolveParser(type || valueType)(value),
+    };
+  }, {});
 }
 
 function listRegions(query = "") {
-  const autocompleteList = consts.ALL_AWS_REGIONS.map(({ regionId, regionLabel }) => ({
-    id: regionId,
-    value: `${regionId} - ${regionLabel}`,
-  }));
+  const autocompleteList = consts.ALL_AWS_REGIONS.map(({ regionId, regionLabel }) =>
+    toAutocompleteItemFromPrimitive(regionId, `${regionId} - ${regionLabel}`));
 
   return filterItemsByQuery(autocompleteList, query);
 }
@@ -28,11 +34,23 @@ function getRegionLabel(regionId) {
   return consts.ALL_AWS_REGIONS.find((region) => region.regionId === regionId).regionLabel;
 }
 
-function autocompleteListFromAwsCall(listFuncName, pathToArray, pathToValue) {
+function autocompleteListFromAwsCall(listFuncName, pathToArray = "", pathToValue = "") {
   return async (query, params, client) => {
+    if (!_.has(client, listFuncName)) {
+      throw new Error(`Method "${listFuncName}" doesn't exist on service`);
+    }
     const response = await client[listFuncName]().promise();
-    const autocompleteItems = _.get(response, pathToArray)
-      .map((object) => toAutocompleteItemFromPrimitive(_.get(object, pathToValue)));
+
+    if (pathToArray !== "" && !_.has(response, pathToArray)) {
+      throw new Error(`Path "${pathToArray}" doesn't exist on method call response`);
+    }
+    const autocompleteItems = (pathToArray === "" ? response : _.get(response, pathToArray))
+      .map((object) => {
+        if (pathToValue !== "" && (_.isArray(object) || !_.has(object, pathToValue))) {
+          throw new Error(`Path "${pathToValue}" doesn't exist on elements of array`);
+        }
+        return toAutocompleteItemFromPrimitive(pathToValue === "" ? object : _.get(object, pathToValue))
+      });
 
     return filterItemsByQuery(autocompleteItems, query);
   };

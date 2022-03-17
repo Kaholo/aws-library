@@ -1,5 +1,31 @@
 const _ = require("lodash");
 
+function resolveParser(type) {
+  switch (type) {
+    case "object":
+      return object;
+    case "number":
+      return number;
+    case "boolean":
+      return boolean;
+    case "vault":
+    case "options":
+    case "text":
+    case "string":
+      return string;
+    case "autocomplete":
+      return autocomplete;
+    case "array":
+      return array;
+    case "tag":
+      return tag;
+    case "tags":
+      return tags;
+    default:
+      throw new Error(`Can't resolve parser of type "${type}"`);
+  }
+}
+
 function object(value) {
   if (_.isObject(value)) { return value; }
   if (_.isString(value)) {
@@ -99,36 +125,10 @@ function tags(value) {
     return tagsString(value);
   }
   if (_.isObject(value)) {
-    if (isTagObject(value)) { return value; }
+    if (isTagObject(value)) { return [ value ]; }
     return _.entries(value).map(([Key, Value]) => ({ Key: Key.trim(), Value: Value.trim()}));
   }
   throw new Error("Unsupported tags format!");
-}
-
-function resolveParser(type) {
-  switch (type) {
-    case "object":
-      return object;
-    case "number":
-      return number;
-    case "boolean":
-      return boolean;
-    case "vault":
-    case "options":
-    case "text":
-    case "string":
-      return string;
-    case "autocomplete":
-      return autocomplete;
-    case "array":
-      return array;
-    case "tag":
-      return tag;
-    case "tags":
-      return tags;
-    default:
-      throw new Error(`Can't resolve parser of type "${type}"`);
-  }
 }
 
 module.exports = {

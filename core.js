@@ -5,6 +5,9 @@ const consts = require("./consts.json");
 
 function mapToAwsMethod(functionName, payloadFunction = null) {
   return (client, params, region) => {
+    if (!_.has(client, functionName)) {
+      throw new Error(`No method "${functionName}" found on client!`);
+    }
     const payload = helpers.removeUndefinedAndEmpty(
       payloadFunction
         ? payloadFunction(params, region)
