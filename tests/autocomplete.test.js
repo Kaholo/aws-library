@@ -43,25 +43,28 @@ const autocompletePluginSettings = [
 ];
 
 describe("mapAutocompleteFuncToObject", () => {
-  test("works as expected for both pluginParams and pluginSettings data formats", () => {
-    const returnedObjectForParams = autocomplete.mapAutocompleteFuncParamsToObject(autocompleteActionParams);
-    const returnedObjectForSettings = autocomplete.mapAutocompleteFuncParamsToObject(autocompletePluginSettings);
-
-    expect(returnedObjectForParams).toBeInstanceOf(Object);
-    expect(returnedObjectForSettings).toBeInstanceOf(Object);
-    expect(returnedObjectForParams).not.toStrictEqual({});
-    expect(returnedObjectForSettings).not.toStrictEqual({});
+  const expectObjectToNotBeEmptyAndToNotContainNilKeysNorValues = (object) => {
+    expect(object).toBeInstanceOf(Object);
+    expect(object).not.toStrictEqual({});
 
     const allKeysAndValues = [
-      ..._.keys(returnedObjectForParams),
-      ..._.keys(returnedObjectForSettings),
-      ..._.values(returnedObjectForParams),
-      ..._.values(returnedObjectForSettings),
+      ..._.keys(object),
+      ..._.values(object),
     ];
 
     expect(allKeysAndValues).not.toContain(null);
     expect(allKeysAndValues).not.toContain(undefined);
     expect(allKeysAndValues).not.toContain(NaN);
+  }
+
+  test("works as expected for pluginParams data format", () => {
+    const returnedObjectForParams = autocomplete.mapAutocompleteFuncParamsToObject(autocompleteActionParams);
+    expectObjectToNotBeEmptyAndToNotContainNilKeysNorValues(returnedObjectForParams);
+  });
+
+  test("works as expected for pluginSettings data format", () => {
+    const returnedObjectForSettings = autocomplete.mapAutocompleteFuncParamsToObject(autocompletePluginSettings);
+    expectObjectToNotBeEmptyAndToNotContainNilKeysNorValues(returnedObjectForSettings);
   });
 
   test("properly converts array of values into object with correct keys and parsed values", () => {

@@ -120,7 +120,7 @@ describe("bootstrap", () => {
     core.__set__("wrapAutocompleteFunction", jest.fn());
 
     const bootstrappedObject = core.bootstrap({}, mockPluginMethods, mockAutocompleteFunctions);
-    expect(_.keys(bootstrappedObject)).toHaveLength(6);
+    expect(_.keys(bootstrappedObject)).toHaveLength(_.entries(mockPluginMethods).length + _.entries(mockAutocompleteFunctions).length);
     expect(_.keys(bootstrappedObject)).toStrictEqual([..._.keys(mockPluginMethods), ..._.keys(mockAutocompleteFunctions)]);
   });
 
@@ -139,7 +139,7 @@ describe("bootstrap", () => {
     expect(mockPluginMethods.method1).toHaveBeenCalledWith(mockClient, mockParsedParams, mockRegion, mockMethodParameters);
   });
 
-  test("properly wraps plugin methods by returning the function that calls the original autocomplete method with correct arguments", () => {
+  test("properly wraps autocomplete functions by returning the function that calls the original autocomplete function with correct arguments", () => {
     const mockAutocompleteParameters = {
       pluginSettings: mockAutocompleteSettings,
       actionParams: mockAutocompleteParams,
