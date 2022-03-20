@@ -36,7 +36,7 @@ function getRegionLabel(regionId) {
 
 function autocompleteListFromAwsCall(listFuncName, pathToArray = "", pathToValue = "") {
   return async (query, params, client) => {
-    if (!_.has(client, listFuncName)) {
+    if (!_.hasIn(client, listFuncName)) {
       throw new Error(`Method "${listFuncName}" doesn't exist on service`);
     }
     const response = await client[listFuncName]().promise();

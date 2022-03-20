@@ -17,19 +17,28 @@ function loadConfiguration() {
 }
 
 function readRegion(params, settings, label = consts.DEFAULT_CREDENTIAL_LABELS.REGION) {
+  if (!_.has(params, label) && !_.has(settings, label)) {
+    throw new Error(`No region has been found under "${label}" in neither params nor settings.`);
+  }
   return parsers.autocomplete(params[label]) || parsers.autocomplete(settings[label]);
 }
 
 function readCredentials(params, settings, labels = consts.DEFAULT_CREDENTIAL_LABELS) {
+  const credentialKeys = [labels.ACCESS_KEY, labels.SECRET_KEY, labels.REGION];
+  if (_.difference(credentialKeys, _.keys({ ...params, ...settings })).length !== 0) {
+    throw new Error(`Credential labels has not been found on neither params nor settings`);
+  }
+
   return {
     accessKeyId: parsers.string(params[labels.ACCESS_KEY]) || parsers.string(settings[labels.ACCESS_KEY]),
     secretAccessKey: parsers.string(params[labels.SECRET_KEY]) || parsers.string(settings[labels.SECRET_KEY]),
-    region: readRegion(params, settings),
+    region: readRegion(params, settings, labels.REGION),
   };
 }
 
 function removeUndefinedAndEmpty(object) {
-  return _.omitBy(object, (value) => _.isNil(value) || (_.isObjectLike(value) && _.isEmpty(value)));
+  if (!_.isPlainObject(object)) { return object; }
+  return _.omitBy(object, (value) => value === "" || _.isNil(value) || (_.isObjectLike(value) && _.isEmpty(value)));
 }
 
 function tryParseJson(value) {
@@ -56,7 +65,7 @@ function parseMethodParameter(paramDefinition, value) {
   }
 
   const parserToUse = paramDefinition.parserType || paramDefinition.type;
-  return parsers.resolveParser(parserToUse)(value);
+  return parsers.resolveParser(parserToUse)(valueToParse);
 }
 
 function readActionArguments(
@@ -76,7 +85,11 @@ function readActionArguments(
       paramValues[paramDefinition.name],
     );
   });
-  return removeCredentials(paramValues, credentialLabels);
+
+  return removeCredentials(
+    removeUndefinedAndEmpty(paramValues),
+    credentialLabels
+  );
 }
 
 function prepareParametersForAnotherMethodCall(methodName, params, additionalParams = {}) {
@@ -95,6 +108,12 @@ function prepareParametersForAnotherMethodCall(methodName, params, additionalPar
 }
 
 function buildTagSpecification(resourceType, tags) {
+  if (resourceType === "" || _.isNil(resourceType)) {
+    throw new Error("Resource type cannot be empty nor null / undefined");
+  }
+  if (_.isNil(tags)) {
+    throw new Error("Tags cannot be null nor undefined");
+  }
   const unparsedTags = !_.isArray(tags) ? [tags] : tags;
 
   if (_.isEmpty(_.compact(unparsedTags))) { return []; }
