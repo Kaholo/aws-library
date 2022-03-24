@@ -4,7 +4,7 @@ const helpers = require("../helpers");
 const rewire = require("rewire");
 
 describe("removeCredentials", () => {
-  test("properly removes credentials from params based on DEFAULT_CREDENTIAL_LABELS if no labels provided", () => {
+  test("properly removes credentials from params", () => {
     const params = {
       [consts.DEFAULT_CREDENTIAL_LABELS.ACCESS_KEY]: "test access",
       [consts.DEFAULT_CREDENTIAL_LABELS.SECRET_KEY]: "test secret",
@@ -142,16 +142,12 @@ describe("readRegion", () => {
   });
 
   test("throws if no region has been found in neither params nor settings", () => {
-    expect(() => helpers.readRegion({}, {})).toThrowError();
+    const noRegionFoundErrorMessage = `No region has been found under "REGION" in neither params nor settings.`;
+    expect(() => helpers.readRegion({}, {})).toThrowError(noRegionFoundErrorMessage);
   });
 });
 
 describe("readCredentials", () => {
-  const expectCredentialsObject = (object) => {
-    expect(_.keys(object)).toStrictEqual(["accessKeyId", "secretAccessKey", "region"]);
-    _.values(object).forEach(_.isString);
-  };
-
   test("returns proper credentials object from params and settings using DEFAULT_CREDENTIAL_LABELS by default", () => {
     const params = {
       [consts.DEFAULT_CREDENTIAL_LABELS.ACCESS_KEY]: "test access",
@@ -221,8 +217,9 @@ describe("readCredentials", () => {
       [consts.DEFAULT_CREDENTIAL_LABELS.SECRET_KEY]: "test settings secret",
     };
 
-    expect(() => helpers.readCredentials({}, {})).toThrowError();
-    expect(() => helpers.readCredentials(incompleteParams, incompleteSettings)).toThrowError();
+    const expectedErrorMessage = "Credential labels has not been found on neither params nor settings";
+    expect(() => helpers.readCredentials({}, {})).toThrowError(expectedErrorMessage);
+    expect(() => helpers.readCredentials(incompleteParams, incompleteSettings)).toThrowError(expectedErrorMessage);
   });
 
 });
@@ -435,9 +432,11 @@ describe("buildTagSpecification", () => {
   });
 
   test("throws if resourceType is empty or any of the arguments is nil", () => {
-    expect(() => helpers.buildTagSpecification("", null)).toThrowError();
-    expect(() => helpers.buildTagSpecification("hello", null)).toThrowError();
-    expect(() => helpers.buildTagSpecification(null, "proper=tags")).toThrowError();
+    const resourceTypeErrorMessage = "Resource type cannot be empty nor null / undefined";
+    const tagsErrorMessage = "Tags cannot be null nor undefined";
+    expect(() => helpers.buildTagSpecification("", null)).toThrowError(resourceTypeErrorMessage);
+    expect(() => helpers.buildTagSpecification("hello", null)).toThrowError(tagsErrorMessage);
+    expect(() => helpers.buildTagSpecification(null, "proper=tags")).toThrowError(resourceTypeErrorMessage);
   });
 });
 

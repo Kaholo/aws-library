@@ -1,163 +1,258 @@
 const _ = require("lodash");
 const rewire = require("rewire");
 
-let core;
+const core = require("../core");
+const consts = require("../consts.json");
 
-const mockPluginMethods = {
-  method1: jest.fn().mockImplementation((client) => client),
-  method2: jest.fn(),
-  method3: jest.fn(),
-};
-const mockAutocompleteFunctions = {
-  auto1: jest.fn(),
-  auto2: jest.fn(),
-  auto3: jest.fn(),
-};
+function getMockPluginMethod() {
+  return jest.fn().mockImplementation(() => new Promise(() => {}));
+}
 
-const mockAction = {
-  id: "mockAction",
-  params: [],
-};
-const mockSettings = { id: "mockSettings" };
+function getMockAutocompleteFunction() {
+  return jest.fn().mockImplementation(() => []);
+}
 
-const mockServiceConstructor = jest.fn();
+describe("generateAwsMethod", () =>{
+  test("creates an independent AWS method", () => {
+    const mockMethodPromise = jest.fn();
 
-const mockAutocompleteParams = [{
-  value: "param1 value",
-  name: "param1",
-  type: "string"
-}];
-const mockAutocompleteSettings = [{
-  value: "setting1 value",
-  name: "setting1",
-  valueType: "string"
-}];
+    const mockClient = {
+      mockMethod: jest.fn().mockImplementation(() => ({
+        promise: mockMethodPromise
+      })),
+      anotherMockMethod: jest.fn().mockImplementation(() => ({
+        promise: () => {}
+      })),
+    };
 
-const mockClient = { id: "mockClient" };
-const mockParsedParams = { id: "mockParsedParams" };
-const mockRegion = "mock region";
-const mockQuery = "mock query";
+    const parametersWithoutEmptyValues = {
+      string: "Some text",
+      number: 5,
+      bool: true,
+      array: ["Some value", "Some other value"],
+      nestedObject: {
+        key: "value"
+      }
+    };
 
-beforeEach(() => {
-  core = rewire("../core.js");
-})
+    const simpleParameters = {
+      name: "some name"
+    };
 
-describe("mapToAwsMethod", () =>{
-  const mockMethodPromise = jest.fn();
+    const awsMockMethod = core.generateAwsMethod("mockMethod");
+    const anotherAwsMockMethod = core.generateAwsMethod("anotherMockMethod");
 
-  const mockClient = {
-    mockMethod: jest.fn().mockImplementation((payload) => ({
-      promise: mockMethodPromise
-    })),
-    anotherMockMethod: jest.fn().mockImplementation(() => ({
-      promise: () => {}
-    })),
-  };
-
-  const simpleParameters = {
-    name: "some name"
-  };
-
-  const parametersWithoutEmptyValues = {
-    string: "Some text",
-    number: 5,
-    bool: true,
-    array: ["Some value", "Some other value"],
-    nestedObject: {
-      key: "value"
-    }
-  };
-
-  test("returns a function that triggers only specified service method on call with provided parameters", () => {
-
-    const returnedFunction1 = core.mapToAwsMethod("mockMethod");
-    const returnedFunction2 = core.mapToAwsMethod("anotherMockMethod");
-
-    returnedFunction1(mockClient, parametersWithoutEmptyValues);
+    awsMockMethod(mockClient, parametersWithoutEmptyValues);
 
     expect(mockClient.mockMethod).toHaveBeenCalledTimes(1);
     expect(mockClient.mockMethod).toHaveBeenCalledWith(parametersWithoutEmptyValues);
     expect(mockClient.anotherMockMethod).toHaveBeenCalledTimes(0);
 
-    returnedFunction2(mockClient, simpleParameters);
+    anotherAwsMockMethod(mockClient, simpleParameters);
 
     expect(mockClient.mockMethod).toHaveBeenCalledTimes(1);
     expect(mockClient.anotherMockMethod).toHaveBeenCalledTimes(1);
     expect(mockClient.anotherMockMethod).toHaveBeenCalledWith(simpleParameters);
   });
 
-  test("returns a function that triggers the payload function with params on call and pass its result to service method", () => {
-    const mockPayloadFunction = jest.fn().mockImplementation((params) => parametersWithoutEmptyValues);
-    const returnedFunction = core.mapToAwsMethod("mockMethod", mockPayloadFunction);
+  test("creates AWS method which maps params before execution", () => {
+    const mockClient = {
+      mockMethod: jest.fn().mockImplementation(() => ({
+        promise: jest.fn()
+      })),
+      anotherMockMethod: jest.fn().mockImplementation(() => ({
+        promise: () => {}
+      })),
+    };
+
+    const parametersWithoutEmptyValues = {
+      string: "Some text",
+      number: 5,
+      bool: true,
+      array: ["Some value", "Some other value"],
+      nestedObject: {
+        key: "value"
+      }
+    };
+
+    const simpleParameters = {
+      name: "some name"
+    };
+
+    const mockPayloadFunction = jest.fn().mockImplementation(() => parametersWithoutEmptyValues);
+    const mockAwsMethod = core.generateAwsMethod("mockMethod", mockPayloadFunction);
     const someRegion = "some region";
 
     expect(mockPayloadFunction).toHaveBeenCalledTimes(0);
 
-    returnedFunction(mockClient, simpleParameters, someRegion);
+    mockAwsMethod(mockClient, simpleParameters, someRegion);
     expect(mockPayloadFunction).toHaveBeenCalledTimes(1);
     expect(mockPayloadFunction).toHaveBeenCalledWith(simpleParameters, someRegion);
     expect(mockClient.mockMethod).toHaveBeenCalledWith(parametersWithoutEmptyValues);
   });
 
   test("returns a function that calls `promise()` method on service function result on call", () => {
-    const returnedFunction = core.mapToAwsMethod("mockMethod");
+    const mockMethodPromise = jest.fn();
 
-    returnedFunction(mockClient);
+    const mockClient = {
+      mockMethod: jest.fn().mockImplementation(() => ({
+        promise: mockMethodPromise
+      })),
+      anotherMockMethod: jest.fn().mockImplementation(() => ({
+        promise: () => {}
+      })),
+    };
+
+    const mockAwsMethod = core.generateAwsMethod("mockMethod");
+
+    mockAwsMethod(mockClient);
     expect(mockClient.mockMethod).toHaveBeenCalled();
     expect(mockMethodPromise).toHaveBeenCalled();
   });
 
-  test("returns a function that throws if no such method has been found", () => {
-    const returnedFunction = core.mapToAwsMethod("nonExistentMethod");
-    expect(() => returnedFunction(mockClient)).toThrowError();
+  test("returns a function that throws if no such method is found", () => {
+    const mockClient = {
+      mockMethod: jest.fn().mockImplementation(() => ({
+        promise: mockMethodPromise
+      })),
+      anotherMockMethod: jest.fn().mockImplementation(() => ({
+        promise: () => {}
+      })),
+    };
+    const awsMethod = core.generateAwsMethod("nonExistentMethod");
+    expect(() => awsMethod(mockClient)).toThrowError("No method \"nonExistentMethod\" found on client!");
   });
 });
 
 describe("bootstrap", () => {
 
   test("returns a single object containing all of the functions passed as arguments", () => {
-    core.__set__("wrapPluginMethod", jest.fn());
-    core.__set__("wrapAutocompleteFunction", jest.fn());
+    const rewiredCore = rewire("../core.js");
+    rewiredCore.__set__("wrapPluginMethod", jest.fn());
+    rewiredCore.__set__("wrapAutocompleteFunction", jest.fn());
 
-    const bootstrappedObject = core.bootstrap({}, mockPluginMethods, mockAutocompleteFunctions);
+    const mockPluginMethods = {
+      method1: getMockPluginMethod(),
+      method2: getMockPluginMethod(),
+      method3: getMockPluginMethod(),
+    }
+
+    const mockAutocompleteFunctions = {
+      auto1: getMockAutocompleteFunction(),
+      auto2: getMockAutocompleteFunction(),
+      auto3: getMockAutocompleteFunction(),
+    }
+
+    const bootstrappedObject = rewiredCore.bootstrap({}, mockPluginMethods, mockAutocompleteFunctions);
     expect(_.keys(bootstrappedObject)).toHaveLength(_.entries(mockPluginMethods).length + _.entries(mockAutocompleteFunctions).length);
     expect(_.keys(bootstrappedObject)).toStrictEqual([..._.keys(mockPluginMethods), ..._.keys(mockAutocompleteFunctions)]);
   });
 
-  test("properly wraps plugin methods by returning the function that calls the original plugin method with correct arguments", () => {
+  test("injects service instance, parsed parameters, region and original method parameters into plugin methods as parameters", () => {
+    const rewiredCore = rewire("../core.js");
+    const mockAction = {
+      id: "mockAction",
+        params: [],
+    };
+
+    const mockSettings = { id: "mockSettings" };
+
     const mockMethodParameters = {
       action: mockAction,
       settings: mockSettings
     };
-    core.__set__("getServiceInstance", jest.fn().mockImplementation(() => mockClient));
-    core.__set__("helpers.readActionArguments", jest.fn().mockImplementation(() => mockParsedParams));
-    core.__set__("helpers.readRegion", jest.fn().mockImplementation(() => mockRegion));
 
-    const bootstrappedObject = core.bootstrap(mockServiceConstructor, mockPluginMethods, {});
+    const mockClient = { id: "mockClient" };
+    const mockParsedParams = { id: "mockParsedParams" };
+    const mockRegion = "mock region";
+
+    const mockPluginMethods = {
+      method1: getMockPluginMethod()
+    };
+
+    rewiredCore.__set__("getServiceInstance", jest.fn().mockImplementation(() => mockClient));
+    rewiredCore.__set__("helpers.readActionArguments", jest.fn().mockImplementation(() => mockParsedParams));
+    rewiredCore.__set__("helpers.readRegion", jest.fn().mockImplementation(() => mockRegion));
+
+    const bootstrappedObject = rewiredCore.bootstrap(jest.fn(), mockPluginMethods, {});
     bootstrappedObject.method1(mockAction, mockSettings);
 
     expect(mockPluginMethods.method1).toHaveBeenCalledWith(mockClient, mockParsedParams, mockRegion, mockMethodParameters);
   });
 
-  test("properly wraps autocomplete functions by returning the function that calls the original autocomplete function with correct arguments", () => {
+  test("injects query, service instance, parsed parameters, region and original method parameters into autocomplete function as parameters", () => {
+    const rewiredCore = rewire("../core.js");
+    const mockAutocompleteSettings = [{
+      value: "setting1 value",
+      name: "setting1",
+      valueType: "string"
+    }];
+
+    const mockAutocompleteParams = [{
+      value: "param1 value",
+      name: "param1",
+      type: "string"
+    }];
+    const mockParsedParams = { id: "mockParsedParams" };
+
     const mockAutocompleteParameters = {
       pluginSettings: mockAutocompleteSettings,
       actionParams: mockAutocompleteParams,
     };
-    core.__set__("autocomplete.mapAutocompleteFuncParamsToObject", jest.fn().mockImplementation(() => mockParsedParams));
-    core.__set__("getServiceInstance", jest.fn().mockImplementation(() => mockClient));
-    core.__set__("helpers.readRegion", jest.fn().mockImplementation(() => mockRegion));
 
-    const bootstrappedObject = core.bootstrap(mockServiceConstructor, {}, mockAutocompleteFunctions);
+    const mockRegion = "mock region";
+    const mockQuery = "mock query";
+    const mockClient = { id: "mockClient" };
+
+    const mockAutocompleteFunctions = {
+      auto1: getMockAutocompleteFunction()
+    }
+
+    rewiredCore.__set__("autocomplete.mapAutocompleteFuncParamsToObject", jest.fn().mockImplementation(() => mockParsedParams));
+    rewiredCore.__set__("getServiceInstance", jest.fn().mockImplementation(() => mockClient));
+    rewiredCore.__set__("helpers.readRegion", jest.fn().mockImplementation(() => mockRegion));
+
+    const bootstrappedObject = rewiredCore.bootstrap(jest.fn(), {}, mockAutocompleteFunctions);
     bootstrappedObject.auto1(mockQuery, mockAutocompleteSettings, mockAutocompleteParams);
 
     expect(mockAutocompleteFunctions.auto1)
       .toHaveBeenCalledWith(mockQuery, mockParsedParams, mockClient, mockRegion, mockAutocompleteParameters);
   });
+
+  test("injects success message if returned promise resolves without value", async () => {
+    const rewiredCore = rewire("../core.js");
+    const mockParsedParams = { id: "mockParsedParams" };
+    const mockRegion = "mock region";
+    const mockClient = { id: "mockClient" };
+    const methodSuccessValue = { status: "success" };
+    const mockAction = {
+      id: "mockAction",
+      params: [],
+    };
+    const mockSettings = { id: "mockSettings" };
+
+    const mockPluginMethods = {
+      methodToSucceedWithoutValue: getMockPluginMethod().mockImplementation(() => Promise.resolve({})),
+      methodToSucceedWithValue: getMockPluginMethod().mockImplementation(() => Promise.resolve(methodSuccessValue)),
+    }
+
+    rewiredCore.__set__("getServiceInstance", jest.fn().mockImplementation(() => mockClient));
+    rewiredCore.__set__("helpers.readActionArguments", jest.fn().mockImplementation(() => mockParsedParams));
+    rewiredCore.__set__("helpers.readRegion", jest.fn().mockImplementation(() => mockRegion));
+
+    const bootstrappedObject = rewiredCore.bootstrap(jest.fn(), mockPluginMethods, {});
+    const implicitlyReturnedValue = await bootstrappedObject.methodToSucceedWithoutValue(mockAction, mockSettings);
+    const explicitlyReturnedValue = await bootstrappedObject.methodToSucceedWithValue(mockAction, mockSettings);
+
+    expect(implicitlyReturnedValue).toStrictEqual(consts.OPERATION_FINISHED_SUCCESSFULLY_MESSAGE);
+    expect(explicitlyReturnedValue).toStrictEqual(methodSuccessValue);
+  });
 });
 
 describe("getServiceInstance", () => {
-  test("calls provided service constructor per method call and returns its the result", async () => {
+  test("is called for every plugin method", async () => {
+    const rewiredCore = rewire("../core.js");
+    const mockClient = { id: "mockClient" };
     const mockServiceConstructor = jest.fn().mockImplementation(() => mockClient);
 
     const mockCredentials = {
@@ -166,11 +261,26 @@ describe("getServiceInstance", () => {
       region: "region",
     };
 
-    core.__set__("helpers.readCredentials", jest.fn().mockImplementation(() => mockCredentials));
-    core.__set__("helpers.readActionArguments", jest.fn().mockImplementation(() => mockParsedParams));
-    core.__set__("helpers.readRegion", jest.fn().mockImplementation(() => mockRegion));
+    const mockParsedParams = { id: "mockParsedParams" };
+    const mockRegion = "mock region";
 
-    const bootstrappedObject = core.bootstrap(mockServiceConstructor, mockPluginMethods, {});
+    const mockPluginMethods = {
+      method1: getMockPluginMethod().mockImplementation((client) => Promise.resolve(client)),
+      method2: getMockPluginMethod()
+    }
+
+    const mockAction = {
+      id: "mockAction",
+      params: [],
+    };
+
+    const mockSettings = { id: "mockSettings" };
+
+    rewiredCore.__set__("helpers.readCredentials", jest.fn().mockImplementation(() => mockCredentials));
+    rewiredCore.__set__("helpers.readActionArguments", jest.fn().mockImplementation(() => mockParsedParams));
+    rewiredCore.__set__("helpers.readRegion", jest.fn().mockImplementation(() => mockRegion));
+
+    const bootstrappedObject = rewiredCore.bootstrap(mockServiceConstructor, mockPluginMethods, {});
 
     const methodResult = await bootstrappedObject.method1(mockAction, mockSettings);
     expect(mockServiceConstructor).toHaveBeenCalledTimes(1);

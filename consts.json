@@ -1,4 +1,5 @@
 {
+  "OPERATION_FINISHED_SUCCESSFULLY_MESSAGE": "Operation finished successfully!",
   "MISSING_OR_INCORRECT_CREDENTIALS_ERROR_MESSAGE": "Missing or incorrect credentials - please select valid access and secret keys first",
   "DEFAULT_CREDENTIAL_LABELS": {
     "ACCESS_KEY": "AWS_ACCESS_KEY_ID",

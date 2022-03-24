@@ -97,10 +97,11 @@ function tag(value) {
 
   if (_.isString(value)) {
     const [Key, Value] = value.split(/=(.+)/);
-    if (Key.trim() !== "" && Value.trim() !== "") {
-      return { Key: Key.trim(), Value: Value.trim() };
+    if (_.isNil(Key) || _.isNil(Value) || Key.trim() === "" || Value.trim() === "") {
+      throw new Error(`Incorrectly formatted tag string: ${value}`);
     }
-    throw new Error(`Incorrectly formatted tag string: ${value}`);
+
+    return { Key: Key.trim(), Value: Value.trim() };
   }
   throw new Error("Unsupported tags format!");
 }

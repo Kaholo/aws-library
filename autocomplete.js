@@ -7,14 +7,23 @@ const consts = require("./consts.json");
  * Array of values passed to autocomplete function as action parameters.
  */
 function mapAutocompleteFuncParamsToObject(params) {
-  if (!_.isArray(params) || !_.every(params, _.isObject)) {
-    throw new Error("Cannot map parameters for autocomplete function - incorrect format");
+  if (!_.isArray(params)) {
+    throw new Error("Failed to map autocomplete parameters to object – params provided are not an array");
+  }
+  if (!_.every(params, _.isObject)) {
+    throw new Error("Failed to map autocomplete parameters to object - every item of params array need to be an object");
   }
   return params.reduce((acc, {
     value, name, type, valueType,
   }) => {
-    if ([value, name, type || valueType].some(_.isNil)) {
-      throw new Error("Cannot map parameters for autocomplete function - some of the parameters are missing required fields");
+    if (_.isNil(value)) {
+      throw new Error("Failed to map one of autocomplete parameters to object - `value` field is required");
+    }
+    if (_.isNil(name)) {
+      throw new Error("Failed to map one of autocomplete parameters to object - `name` field is required");
+    }
+    if (_.isNil(type || valueType)) {
+      throw new Error("Failed to map one of autocomplete parameters to object - either `type` or `valueType` field is required");
     }
     return {
       ...acc,
@@ -31,15 +40,19 @@ function listRegions(query = "") {
 }
 
 function getRegionLabel(regionId) {
-  return consts.ALL_AWS_REGIONS.find((region) => region.regionId === regionId).regionLabel;
+  const foundRegion = consts.ALL_AWS_REGIONS.find((region) => region.regionId === regionId);
+  if (_.isNil(foundRegion)) {
+    throw new Error(`Could not find a region label for region id: "${regionId}"`)
+  }
+  return foundRegion.regionLabel;
 }
 
 function autocompleteListFromAwsCall(listFuncName, pathToArray = "", pathToValue = "") {
-  return async (query, params, client) => {
-    if (!_.hasIn(client, listFuncName)) {
+  return async (query, params, awsServiceClient) => {
+    if (!_.hasIn(awsServiceClient, listFuncName)) {
       throw new Error(`Method "${listFuncName}" doesn't exist on service`);
     }
-    const response = await client[listFuncName]().promise();
+    const response = await awsServiceClient[listFuncName]().promise();
 
     if (pathToArray !== "" && !_.has(response, pathToArray)) {
       throw new Error(`Path "${pathToArray}" doesn't exist on method call response`);

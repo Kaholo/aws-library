@@ -15,19 +15,22 @@ describe("Object parser", () => {
   });
 
   test("returns parsed object if proper JSON passed", () => {
-    expect(parsers.object(JSON.stringify(properObject))).toStrictEqual(properObject);
+    const json = `{"stringParam":"first","numberParam":123,"arrayParam":[1,2,3,4],"objectParam":{"test":"param"}}`;
+    expect(parsers.object(json)).toStrictEqual(properObject);
   });
 
   test("throws if malformed JSON passed", () => {
-    expect(() => parsers.object("{\"name:}\"")).toThrowError();
+    expect(() => parsers.object("{\"name:}\"")).toThrowError("Couldn't parse provided value as object: {\"name:}\"");
   });
 
   test("throws if valid JSON passed and parsed value is not an object", () => {
-    expect(() => parsers.object("string-value")).toThrowError();
+    const expectedErrorMessage = `Couldn't parse provided value as object: string-value`;
+    expect(() => parsers.object("string-value")).toThrowError(expectedErrorMessage);
   });
 
   test("throws if neither object nor JSON string passed", () => {
-    expect(() => parsers.object(123)).toThrowError();
+    const expectedErrorMessage = `123 is not a valid object`;
+    expect(() => parsers.object(123)).toThrowError(expectedErrorMessage);
   });
 });
 
@@ -45,15 +48,18 @@ describe("Number parser", () => {
   });
 
   test("throws if Infinity passed", () => {
-    expect(() => parsers.number(1/0)).toThrowError();
+    const expectedErrorMessage = `Value Infinity is not a valid number`;
+    expect(() => parsers.number(1/0)).toThrowError(expectedErrorMessage);
   });
 
   test("throws if NaN passed", () => {
-    expect(() => parsers.number(1/"nan")).toThrowError();
+    const expectedErrorMessage = `Value NaN is not a valid number`;
+    expect(() => parsers.number(1/"nan")).toThrowError(expectedErrorMessage);
   });
 
   test("throws if another value type is passed", () => {
-    expect(() => parsers.number({})).toThrowError();
+    const expectedErrorMessage = `Value [object Object] is not a valid number`;
+    expect(() => parsers.number({})).toThrowError(expectedErrorMessage);
   });
 });
 
@@ -85,7 +91,8 @@ describe("Boolean parser", () => {
   });
 
   test("throws if value is not of type boolean", () => {
-    expect(() => parsers.boolean(123)).toThrowError();
+    const expectedErrorMessage = `Value 123 is not of type boolean`;
+    expect(() => parsers.boolean(123)).toThrowError(expectedErrorMessage);
   });
 });
 
@@ -101,7 +108,8 @@ describe("String parser", () => {
   });
 
   test("throws if something else passed", () => {
-    expect(() => parsers.string(123)).toThrowError();
+    const expectedErrorMessage = `Value 123 is not a valid string`;
+    expect(() => parsers.string(123)).toThrowError(expectedErrorMessage);
   });
 });
 
@@ -124,7 +132,8 @@ describe("Autocomplete parser", () => {
   });
 
   test("throws if another kind of value passed", () => {
-    expect(() => parsers.autocomplete({})).toThrowError();
+    const expectedErrorMessage = `Value "[object Object]" is not a valid autocomplete result nor string.`;
+    expect(() => parsers.autocomplete({})).toThrowError(expectedErrorMessage);
   })
 });
 
@@ -151,7 +160,8 @@ describe("Array parser", () => {
   });
 
   test("throws if something else provided", () => {
-    expect(() => parsers.array(123)).toThrowError();
+    const expectedErrorMessage = "Unsupported array format";
+    expect(() => parsers.array(123)).toThrowError(expectedErrorMessage);
   });
 });
 
@@ -175,11 +185,6 @@ describe("Tags parser", () => {
     "First tag": "First_value",
     "Middle-tag": "Middlevalue",
     "Last.tag": "Last#value",
-  }
-
-  const anotherMultiTagObject = {
-    "anotherTag": "anotherValue",
-    "yetAnotherTag": "someValue",
   }
 
   test("returns an array with argument if proper tag object passed", () => {
@@ -214,12 +219,14 @@ describe("Tags parser", () => {
   });
 
   test("throws if string in incorrect format passed", () => {
-    expect(() => parsers.tags("someText")).toThrowError();
+    const expectedErrorMessage = `Incorrectly formatted tag string: someText`;
+    expect(() => parsers.tags("someText")).toThrowError(expectedErrorMessage);
   });
 
   test("throws if another type of value passed", () => {
-    expect(() => parsers.tags(5)).toThrowError();
-    expect(() => parsers.tags(true)).toThrowError();
-    expect(() => parsers.tags(false)).toThrowError();
+    const expectedErrorMessage = "Unsupported tags format!";
+    expect(() => parsers.tags(5)).toThrowError(expectedErrorMessage);
+    expect(() => parsers.tags(true)).toThrowError(expectedErrorMessage);
+    expect(() => parsers.tags(false)).toThrowError(expectedErrorMessage);
   });
 });

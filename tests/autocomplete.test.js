@@ -1,7 +1,6 @@
 const _ = require("lodash");
 const autocomplete = require("../autocomplete");
 const consts = require("../consts.json");
-const {toAutocompleteItemFromPrimitive} = require("../autocomplete");
 
 const expectProperAutocompleteObject = (item) => {
   expect(_.keys(item)).toHaveLength(2);
@@ -112,8 +111,10 @@ describe("mapAutocompleteFuncToObject", () => {
       }
     ];
 
-    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(wrongTypeActionParams)).toThrowError();
-    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(wrongTypePluginSettings)).toThrowError();
+    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(wrongTypeActionParams))
+      .toThrowError("Can't resolve parser of type \"no_such_type\"");
+    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(wrongTypePluginSettings))
+      .toThrowError("Can't resolve parser of type \"unknown type\"");
   });
 
   test("throws in case argument passed is not an array of objects", () => {
@@ -124,12 +125,15 @@ describe("mapAutocompleteFuncToObject", () => {
     const number = 10;
     const boolean = true;
 
-    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(array)).toThrowError();
-    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(singleObjectInParamsFormat)).toThrowError();
-    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(singleObjectInDifferentFormat)).toThrowError();
-    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(string)).toThrowError();
-    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(number)).toThrowError();
-    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(boolean)).toThrowError();
+    const arrayNotFilledWithObjectsErrorMessage = "Failed to map autocomplete parameters to object - every item of params array need to be an object";
+    const notArrayErrorMessage = "Failed to map autocomplete parameters to object – params provided are not an array";
+
+    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(array)).toThrowError(arrayNotFilledWithObjectsErrorMessage);
+    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(singleObjectInParamsFormat)).toThrowError(notArrayErrorMessage);
+    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(singleObjectInDifferentFormat)).toThrowError(notArrayErrorMessage);
+    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(string)).toThrowError(notArrayErrorMessage);
+    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(number)).toThrowError(notArrayErrorMessage);
+    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(boolean)).toThrowError(notArrayErrorMessage);
   });
 
   test("throws when params passed are missing fields", () => {
@@ -146,9 +150,13 @@ describe("mapAutocompleteFuncToObject", () => {
       value: "some text"
     }];
 
-    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(paramsWithMissingName)).toThrowError();
-    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(paramsWithMissingValue)).toThrowError();
-    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(paramsWithMissingType)).toThrowError();
+    const missingNameErrorMessage = "Failed to map one of autocomplete parameters to object - `name` field is required";
+    const missingValueErrorMessage = "Failed to map one of autocomplete parameters to object - `value` field is required";
+    const missingTypeErrorMessage = "Failed to map one of autocomplete parameters to object - either `type` or `valueType` field is required";
+
+    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(paramsWithMissingName)).toThrowError(missingNameErrorMessage);
+    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(paramsWithMissingValue)).toThrowError(missingValueErrorMessage);
+    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(paramsWithMissingType)).toThrowError(missingTypeErrorMessage);
 
   });
 });
@@ -198,7 +206,8 @@ describe("getRegionLabel", () => {
   });
 
   test("throws if incorrect regionId provided", () => {
-    expect(() => autocomplete.getRegionLabel("unknown_region")).toThrowError();
+    const expectedErrorMessage = `Could not find a region label for region id: "unknown_region"`;
+    expect(() => autocomplete.getRegionLabel("unknown_region")).toThrowError(expectedErrorMessage);
   });
 });
 
@@ -235,58 +244,63 @@ describe("autocompleteListFromAwsCall", () => {
 
   describe("returns a function that calls client method", () => {
     test("that throws if incorrect paths provided", async () => {
-      const returnedFunction1 = autocomplete.autocompleteListFromAwsCall(
+      const autocompleteFunction = autocomplete.autocompleteListFromAwsCall(
         "listFunctionReturningObjectWithArray",
         "nonExistentPath",
       );
-      const returnedFunction2 = autocomplete.autocompleteListFromAwsCall(
+      const anotherAutocompleteFunction = autocomplete.autocompleteListFromAwsCall(
         "listFunctionReturningObjectWithArrayOfObjects",
         "functionResult",
         "nonExistentPath2",
       );
 
-      await expect(() => returnedFunction1("", [], mockClient)).rejects.toThrowError();
-      await expect(() => returnedFunction2("", [], mockClient)).rejects.toThrowError();
+      const noPathToArrayErrorMessage = `Path "nonExistentPath" doesn't exist on method call response`;
+      const noPathToValueErrorMessage = `Path "nonExistentPath2" doesn't exist on elements of array`;
+
+      await expect(() => autocompleteFunction("", [], mockClient)).rejects.toThrowError(noPathToArrayErrorMessage);
+      await expect(() => anotherAutocompleteFunction("", [], mockClient)).rejects.toThrowError(noPathToValueErrorMessage);
     });
 
     describe("returning sorted list of autocomplete items", () => {
       test("if client method returns array and no paths provided", async () => {
-        const returnedFunction = autocomplete.autocompleteListFromAwsCall("listFunctionReturningArray");
-        const functionResult = await returnedFunction("", [], mockClient);
-        expectSortedArrayOfAutocompleteObjects(functionResult, listOfStrings);
+        const autocompleteFunction = autocomplete.autocompleteListFromAwsCall("listFunctionReturningArray");
+        const autocompleteList = await autocompleteFunction("", [], mockClient);
+        expectSortedArrayOfAutocompleteObjects(autocompleteList, listOfStrings);
       });
 
       test("if client method returns an object and proper path to array is provided", async () => {
-        const returnedFunction = autocomplete.autocompleteListFromAwsCall(
+        const autocompleteFunction = autocomplete.autocompleteListFromAwsCall(
           "listFunctionReturningObjectWithArray",
           "functionResult"
         );
-        const functionResult = await returnedFunction("", [], mockClient);
+        const functionResult = await autocompleteFunction("", [], mockClient);
         expectSortedArrayOfAutocompleteObjects(functionResult, listOfStrings);
       });
 
       test("if client method returns an object with nested array of objects and proper paths are provided", async () => {
-        const returnedFunction = autocomplete.autocompleteListFromAwsCall(
+        const autocompleteFunction = autocomplete.autocompleteListFromAwsCall(
           "listFunctionReturningObjectWithArrayOfObjects",
           "functionResult",
           "value"
         );
-        const functionResult = await returnedFunction("", [], mockClient);
+        const functionResult = await autocompleteFunction("", [], mockClient);
         expectSortedArrayOfAutocompleteObjects(functionResult, listOfObjects.map(({ value }) => value));
       });
     });
 
     test("returning properly filtered autocomplete items", async () => {
-      const returnedFunction = autocomplete.autocompleteListFromAwsCall("listFunctionReturningArray");
-      const functionResult = await returnedFunction("test", [], mockClient);
+      const autocompleteFunction = autocomplete.autocompleteListFromAwsCall("listFunctionReturningArray");
+      const functionResult = await autocompleteFunction("test", [], mockClient);
       const filteredValues = listOfObjects.map(({ value }) => value).filter((value) => value.includes("test"));
       expectSortedArrayOfAutocompleteObjects(functionResult, filteredValues);
     });
   });
 
   test("returns a function that throws if method not exists", async () => {
-    const returnedFunction = autocomplete.autocompleteListFromAwsCall("nonExistentMethod");
-    await expect(() => returnedFunction("", [], mockClient)).rejects.toThrowError();
+    const autocompleteFunction = autocomplete.autocompleteListFromAwsCall("nonExistentMethod");
+
+    const noMethodErrorMessage = `Method "nonExistentMethod" doesn't exist on service`;
+    await expect(() => autocompleteFunction("", [], mockClient)).rejects.toThrowError(noMethodErrorMessage);
   });
 });
 
@@ -308,15 +322,23 @@ describe("filterItemsByQuery", () => {
   });
 
   test("properly filters the items with single word query", () => {
+    const expectedValues = [
+      "test value3",
+      "test value5",
+      "test value6",
+    ];
     const resultArray = autocomplete.filterItemsByQuery(autocompleteItems, "test");
-    const expectedValues = allAutocompleteItemsValues.filter(value => value.includes("test"));
     expectSortedArrayOfAutocompleteObjects(resultArray, expectedValues);
   });
 
   test("properly filters the items with multi word query, regardless of the words order", () => {
+    const expectedValues = [
+      "test value3",
+      "test value5",
+      "test value6",
+    ];
     const resultArray1 = autocomplete.filterItemsByQuery(autocompleteItems, "value test");
     const resultArray2 = autocomplete.filterItemsByQuery(autocompleteItems, "test value");
-    const expectedValues = allAutocompleteItemsValues.filter(value => value.includes("test value"));
 
     expectSortedArrayOfAutocompleteObjects(resultArray1, expectedValues);
     expect(resultArray1).toStrictEqual(resultArray2);
@@ -327,7 +349,7 @@ describe("filterItemsByQuery", () => {
     expect(resultArray).toStrictEqual([]);
   });
 
-  test("limits the number of returned values to MAX_AUTOCOMPLETE_RESULTS", () => {
+  test("limits the number of returned values to defined default value", () => {
     const veryLongAutocompleteItemsArray = [];
     for (let i = 0; i < 10000; i++) {
       veryLongAutocompleteItemsArray.push({
@@ -343,15 +365,15 @@ describe("filterItemsByQuery", () => {
 
 describe("toAutocompleteItemFromPrimitive", () => {
   test("returns autocomplete item with both fields set to value if no label provided", () => {
-    const returnedItem = toAutocompleteItemFromPrimitive("testItem");
-    expectProperAutocompleteObject(returnedItem);
-    expect(returnedItem.id).toEqual(returnedItem.value);
+    const autocompleteItemFromPrimitive = autocomplete.toAutocompleteItemFromPrimitive("testItem");
+    expectProperAutocompleteObject(autocompleteItemFromPrimitive);
+    expect(autocompleteItemFromPrimitive.id).toEqual(autocompleteItemFromPrimitive.value);
   });
 
   test("returns proper autocomplete item if both params provided", () => {
-    const returnedItem = toAutocompleteItemFromPrimitive("testItem", "testLabel");
-    expectProperAutocompleteObject(returnedItem);
-    expect(returnedItem.id).toEqual("testItem");
-    expect(returnedItem.value).toEqual("testLabel");
+    const autocompleteItemFromPrimitive = autocomplete.toAutocompleteItemFromPrimitive("testItem", "testLabel");
+    expectProperAutocompleteObject(autocompleteItemFromPrimitive);
+    expect(autocompleteItemFromPrimitive.id).toEqual("testItem");
+    expect(autocompleteItemFromPrimitive.value).toEqual("testLabel");
   });
 })
