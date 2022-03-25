@@ -1,0 +1,34 @@
+{
+  "OPERATION_FINISHED_SUCCESSFULLY_MESSAGE": "Operation finished successfully!",
+  "MISSING_OR_INCORRECT_CREDENTIALS_ERROR_MESSAGE": "Missing or incorrect credentials - please select valid access and secret keys first",
+  "DEFAULT_CREDENTIAL_LABELS": {
+    "ACCESS_KEY": "AWS_ACCESS_KEY_ID",
+    "SECRET_KEY": "AWS_SECRET_ACCESS_KEY",
+    "REGION": "REGION"
+  },
+  "MAX_AUTOCOMPLETE_RESULTS": 100,
+  "ALL_AWS_REGIONS": [
+    { "regionId": "us-east-2", "regionLabel": "US East (Ohio)" },
+    { "regionId": "us-east-1", "regionLabel": "US East (N. Virginia)" },
+    { "regionId": "us-west-1", "regionLabel": "US West (N. California)" },
+    { "regionId": "us-west-2", "regionLabel": "US West (Oregon)" },
+    { "regionId": "af-south-1", "regionLabel": "Africa (Cape Town)" },
+    { "regionId": "ap-east-1", "regionLabel": "Asia Pacific (Hong Kong)" },
+    { "regionId": "ap-southeast-3", "regionLabel": "Asia Pacific (Jakarta)" },
+    { "regionId": "ap-south-1", "regionLabel": "Asia Pacific (Mumbai)" },
+    { "regionId": "ap-northeast-3", "regionLabel": "Asia Pacific (Osaka)" },
+    { "regionId": "ap-northeast-2", "regionLabel": "Asia Pacific (Seoul)" },
+    { "regionId": "ap-southeast-1", "regionLabel": "Asia Pacific (Singapore)" },
+    { "regionId": "ap-southeast-2", "regionLabel": "Asia Pacific (Sydney)" },
+    { "regionId": "ap-northeast-1", "regionLabel": "Asia Pacific (Tokyo)" },
+    { "regionId": "ca-central-1", "regionLabel": "Canada (Central)" },
+    { "regionId": "eu-central-1", "regionLabel": "Europe (Frankfurt)" },
+    { "regionId": "eu-west-1", "regionLabel": "Europe (Ireland)" },
+    { "regionId": "eu-west-2", "regionLabel": "Europe (London)" },
+    { "regionId": "eu-south-1", "regionLabel": "Europe (Milan)" },
+    { "regionId": "eu-west-3", "regionLabel": "Europe (Paris)" },
+    { "regionId": "eu-north-1", "regionLabel": "Europe (Stockholm)" },
+    { "regionId": "me-south-1", "regionLabel": "Middle East (Bahrain)" },
+    { "regionId": "sa-east-1", "regionLabel": "South America (São Paulo)" }
+  ]
+}
