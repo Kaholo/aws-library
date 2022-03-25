@@ -26,13 +26,13 @@ function bootstrap(awsService, pluginMethods, autocompleteFuncs) {
 
   const bootstrappedAutocompleteFuncs = _.entries(autocompleteFuncs)
     .map(([funcName, autocompleteFunc]) => ({
-      [funcName]: wrapAutocompleteFunction(awsService, autocompleteFunc),
+      [funcName]: generateAutocompleteFunction(awsService, autocompleteFunc),
     }));
 
   return _.merge(...bootstrappedPluginMethods, ...bootstrappedAutocompleteFuncs);
 }
 
-function wrapAutocompleteFunction(awsService, autocompleteFunction) {
+function generateAutocompleteFunction(awsService, autocompleteFunction) {
   return async (query, pluginSettings, actionParams) => {
     const [params, settings] = [actionParams, pluginSettings]
       .map(autocomplete.mapAutocompleteFuncParamsToObject);

@@ -128,8 +128,8 @@ describe("bootstrap", () => {
 
   test("returns a single object containing all of the functions passed as arguments", () => {
     const rewiredCore = rewire("../core.js");
-    rewiredCore.__set__("wrapPluginMethod", jest.fn());
-    rewiredCore.__set__("wrapAutocompleteFunction", jest.fn());
+    rewiredCore.__set__("generatePluginMethod", jest.fn());
+    rewiredCore.__set__("generateAutocompleteFunction", jest.fn());
 
     const mockPluginMethods = {
       method1: getMockPluginMethod(),
