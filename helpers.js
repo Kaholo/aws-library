@@ -112,7 +112,7 @@ function buildTagSpecification(resourceType, tags) {
     throw new Error("Resource type cannot be empty nor null / undefined");
   }
   if (_.isNil(tags)) {
-    throw new Error("Tags cannot be null nor undefined");
+    return [];
   }
   const unparsedTags = !_.isArray(tags) ? [tags] : tags;
 

@@ -425,18 +425,18 @@ describe("buildTagSpecification", () => {
     expect(helpers.buildTagSpecification(resourceType, tagsString)).toStrictEqual(expectedValue);
   });
 
-  test("returns an empty array if tags provided is empty array or empty string", () => {
+  test("returns an empty array if tags provided is empty array, empty string or nil value", () => {
     const resourceType = "test tag spec";
     expect(helpers.buildTagSpecification(resourceType, [])).toStrictEqual([]);
     expect(helpers.buildTagSpecification(resourceType, "")).toStrictEqual([]);
+    expect(helpers.buildTagSpecification(resourceType, null)).toStrictEqual([]);
+    expect(helpers.buildTagSpecification(resourceType, undefined)).toStrictEqual([]);
   });
 
-  test("throws if resourceType is empty or any of the arguments is nil", () => {
+  test("throws if resourceType is empty or nil", () => {
     const resourceTypeErrorMessage = "Resource type cannot be empty nor null / undefined";
-    const tagsErrorMessage = "Tags cannot be null nor undefined";
     expect(() => helpers.buildTagSpecification("", null)).toThrowError(resourceTypeErrorMessage);
-    expect(() => helpers.buildTagSpecification("hello", null)).toThrowError(tagsErrorMessage);
-    expect(() => helpers.buildTagSpecification(null, "proper=tags")).toThrowError(resourceTypeErrorMessage);
+    expect(() => helpers.buildTagSpecification(null, null)).toThrowError(resourceTypeErrorMessage);
   });
 });
 
