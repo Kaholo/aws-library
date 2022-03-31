@@ -1,8 +1,8 @@
 {
-  "name": "kaholo-aws-plugin",
+  "name": "kaholo-aws-plugin-library",
   "version": "1.0.0",
-  "description": "Kaholo npm package for aws plugins",
-  "main": "aws-plugin.js",
+  "description": "Kaholo library for aws plugins",
+  "main": "aws-plugin-library.js",
   "scripts": {
     "test": "jest",
     "lint": "npx eslint .",
