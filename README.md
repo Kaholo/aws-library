@@ -1,5 +1,5 @@
 # Overview
-This library provides a bootstrapping mechanism to free the developer from  boring, repetitive tasks like retrieving the values from the action object provided by Kaholo platform, parsing the parameters and settings or creating the instance of the same AWS service used in every plugin method.
+This library is an extention of [Kaholo Plugin Library](https://github.com/Kaholo/kaholo-plugin-library). All concepts introduced in there are still valid here, including the bootstrapping. The only difference is that this library includes AWS specific functionality on top of the generic one.
 
 The bootstrapping allows the plugin methods to take the form of:
 ```js
@@ -14,9 +14,6 @@ When using the bootstrapping, the developer can always be sure that:
 - `awsClient` provided in the first argument is already authenticated instance of given AWS service
 - the parameters the plugin method receives are parsed and validated based on their `config.json` definition. Moreover they are already combined with the settings, so no need to handle those separately. The AWS credentials are stripped from the parameters for security reasons.
 - the parameters _only_ consists of the values that are defined in `config.json` for the given method. They are also validated and no empty values are present in the `params` object.
-
-
-This library is an extention of [Kaholo Plugin Library](https://github.com/Kaholo/kaholo-plugin-library). All concepts introduced in there are still valid here, including the bootstrapping. The only difference is that this library includes AWS specific functionality on top of the generic one.
 
 # Core library
 ## bootstrap
