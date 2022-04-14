@@ -4,6 +4,8 @@ function resolveParser(type) {
   switch (type) {
     case "object":
       return object;
+    case "int":
+    case "float":
     case "number":
       return number;
     case "boolean":
