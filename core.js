@@ -18,37 +18,37 @@ function generateAwsMethod(functionName, payloadFunction = null) {
   };
 }
 
-function bootstrap(awsService, pluginMethods, autocompleteFuncs) {
+function bootstrap(awsService, pluginMethods, autocompleteFuncs = {}, credentialLabels = consts.DEFAULT_CREDENTIAL_LABELS) {
   const bootstrappedPluginMethods = _.entries(pluginMethods)
     .map(([methodName, awsMethod]) => ({
-      [methodName]: generatePluginMethod(awsService, awsMethod),
+      [methodName]: generatePluginMethod(awsService, awsMethod, credentialLabels),
     }));
 
   const bootstrappedAutocompleteFuncs = _.entries(autocompleteFuncs)
     .map(([funcName, autocompleteFunc]) => ({
-      [funcName]: generateAutocompleteFunction(awsService, autocompleteFunc),
+      [funcName]: generateAutocompleteFunction(awsService, autocompleteFunc, credentialLabels),
     }));
 
   return _.merge(...bootstrappedPluginMethods, ...bootstrappedAutocompleteFuncs);
 }
 
-function generateAutocompleteFunction(awsService, autocompleteFunction) {
+function generateAutocompleteFunction(awsService, autocompleteFunction, credentialLabels) {
   return async (query, pluginSettings, actionParams) => {
     const [params, settings] = [actionParams, pluginSettings]
       .map(autocomplete.mapAutocompleteFuncParamsToObject);
 
-    const awsServiceClient = getServiceInstance(awsService, params, settings);
-    const region = helpers.readRegion(params, settings);
+    const awsServiceClient = getServiceInstance(awsService, params, settings, credentialLabels);
+    const region = helpers.readRegion(params, settings, credentialLabels.REGION);
 
     return autocompleteFunction(query, params, awsServiceClient, region, { pluginSettings, actionParams });
   };
 }
 
-function generatePluginMethod(awsService, pluginMethod) {
+function generatePluginMethod(awsService, pluginMethod, credentialLabels) {
   return async (action, settings) => {
-    const awsServiceClient = getServiceInstance(awsService, action.params, settings);
-    const params = helpers.readActionArguments(action);
-    const region = helpers.readRegion(action.params, settings);
+    const awsServiceClient = getServiceInstance(awsService, action.params, settings, credentialLabels);
+    const params = helpers.readActionArguments(action, credentialLabels);
+    const region = helpers.readRegion(action.params, settings, credentialLabels.REGION);
 
     // The last parameter is mostly ignored and passed here only to provide user
     // the possibility to access original parameters.
