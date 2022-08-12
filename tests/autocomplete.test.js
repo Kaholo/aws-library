@@ -141,21 +141,15 @@ describe("mapAutocompleteFuncToObject", () => {
       type: "string",
       value: "test value",
     }];
-    const paramsWithMissingValue = [{
-      type: "number",
-      name: "TestNumber",
-    }];
     const paramsWithMissingType = [{
       name: "Some field",
       value: "some text"
     }];
 
     const missingNameErrorMessage = "Failed to map one of autocomplete parameters to object - `name` field is required";
-    const missingValueErrorMessage = "Failed to map one of autocomplete parameters to object - `value` field is required";
     const missingTypeErrorMessage = "Failed to map one of autocomplete parameters to object - either `type` or `valueType` field is required";
 
     expect(() => autocomplete.mapAutocompleteFuncParamsToObject(paramsWithMissingName)).toThrowError(missingNameErrorMessage);
-    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(paramsWithMissingValue)).toThrowError(missingValueErrorMessage);
     expect(() => autocomplete.mapAutocompleteFuncParamsToObject(paramsWithMissingType)).toThrowError(missingTypeErrorMessage);
 
   });
