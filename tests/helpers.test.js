@@ -1,7 +1,7 @@
 const _ = require("lodash");
+const rewire = require("rewire");
 const consts = require("../consts.json");
 const helpers = require("../helpers");
-const rewire = require("rewire");
 
 describe("removeCredentials", () => {
   test("properly removes credentials from params", () => {
@@ -21,7 +21,7 @@ describe("removeCredentials", () => {
       ACCESS_KEY: "access",
       SECRET_KEY: "secret",
       REGION: "region",
-    }
+    };
     const params = {
       access: "test access",
       secret: "test secret",
@@ -46,7 +46,7 @@ describe("removeCredentials", () => {
     const result2 = helpers.removeCredentials(paramsWithCredentialsMissing);
     expect(_.keys(result1)).toStrictEqual(["otherParam"]);
     expect(_.keys(result2)).toStrictEqual(["otherParam"]);
-  })
+  });
 });
 
 describe("removeUndefinedAndEmpty", () => {
@@ -57,11 +57,13 @@ describe("removeUndefinedAndEmpty", () => {
       key3: false,
       key4: {
         key41: "test",
-        key42: 10
-      }
+        key42: 10,
+      },
     };
 
-    expect(helpers.removeUndefinedAndEmpty(objectWithoutEmptyValues)).toStrictEqual(objectWithoutEmptyValues);
+    expect(
+      helpers.removeUndefinedAndEmpty(objectWithoutEmptyValues),
+    ).toStrictEqual(objectWithoutEmptyValues);
   });
 
   test("properly removes keys with null or undefined values", () => {
@@ -69,10 +71,10 @@ describe("removeUndefinedAndEmpty", () => {
       key1: null,
       key2: undefined,
       key3: "text",
-    }
+    };
     const expectedObject = {
       key3: "text",
-    }
+    };
 
     expect(helpers.removeUndefinedAndEmpty(objectWithNils)).toStrictEqual(expectedObject);
   });
@@ -84,13 +86,13 @@ describe("removeUndefinedAndEmpty", () => {
       key2a: ["a", "b"],
       key2b: [],
       key3a: { a: "test" },
-      key3b: {}
-    }
+      key3b: {},
+    };
     const expectedObject = {
       key1a: "text",
       key2a: ["a", "b"],
       key3a: { a: "test" },
-    }
+    };
 
     expect(helpers.removeUndefinedAndEmpty(objectWithEmptyValues)).toStrictEqual(expectedObject);
   });
@@ -107,7 +109,7 @@ describe("readRegion", () => {
     const params = {
       [consts.DEFAULT_CREDENTIAL_LABELS.REGION]: {
         id: "eu-west-2",
-        value: "eu-west-2 (London)"
+        value: "eu-west-2 (London)",
       },
     };
     expect(helpers.readRegion(params, {})).toStrictEqual("eu-west-2");
@@ -118,7 +120,7 @@ describe("readRegion", () => {
     const params = {
       customRegion: {
         id: "eu-west-2",
-        value: "eu-west-2 (London)"
+        value: "eu-west-2 (London)",
       },
     };
     expect(helpers.readRegion(params, {}, "customRegion")).toStrictEqual("eu-west-2");
@@ -129,20 +131,20 @@ describe("readRegion", () => {
     const params = {
       [consts.DEFAULT_CREDENTIAL_LABELS.REGION]: {
         id: "eu-west-2",
-        value: "eu-west-2 (London)"
+        value: "eu-west-2 (London)",
       },
     };
     const settings = {
       [consts.DEFAULT_CREDENTIAL_LABELS.REGION]: {
         id: "us-east-2",
-        value: "us-east-2 (Ohio)"
+        value: "us-east-2 (Ohio)",
       },
     };
     expect(helpers.readRegion(params, settings)).toStrictEqual("eu-west-2");
   });
 
   test("throws if no region has been found in neither params nor settings", () => {
-    const noRegionFoundErrorMessage = `No region has been found under "REGION" in neither params nor settings.`;
+    const noRegionFoundErrorMessage = "No region has been found under \"REGION\" in neither params nor settings.";
     expect(() => helpers.readRegion({}, {})).toThrowError(noRegionFoundErrorMessage);
   });
 });
@@ -176,7 +178,7 @@ describe("readCredentials", () => {
       ACCESS_KEY: "access",
       SECRET_KEY: "secret",
       REGION: "region",
-    }
+    };
 
     const expectedResult = {
       accessKeyId: "test access",
@@ -219,9 +221,10 @@ describe("readCredentials", () => {
 
     const expectedErrorMessage = "Credential labels has not been found on neither params nor settings";
     expect(() => helpers.readCredentials({}, {})).toThrowError(expectedErrorMessage);
-    expect(() => helpers.readCredentials(incompleteParams, incompleteSettings)).toThrowError(expectedErrorMessage);
+    expect(
+      () => helpers.readCredentials(incompleteParams, incompleteSettings),
+    ).toThrowError(expectedErrorMessage);
   });
-
 });
 
 describe("readActionArguments", () => {
@@ -239,31 +242,31 @@ describe("readActionArguments", () => {
         testNullParam: null,
         testUndefinedParam: undefined,
         testEmptyParam: "",
- }
+      },
     };
     const minimalMockMethodConfiguration = {
-      "name": "testMethod",
-      "viewName": "Test method",
-      "params": [
+      name: "testMethod",
+      viewName: "Test method",
+      params: [
         {
-          "name": "AWS_ACCESS_KEY_ID",
-          "type": "vault",
+          name: "AWS_ACCESS_KEY_ID",
+          type: "vault",
         },
         {
-          "name": "AWS_SECRET_ACCESS_KEY",
-          "type": "vault",
+          name: "AWS_SECRET_ACCESS_KEY",
+          type: "vault",
         },
         {
-          "name": "REGION",
-          "type": "autocomplete",
+          name: "REGION",
+          type: "autocomplete",
         },
         {
-          "name": "testStringParam",
-          "type": "string",
+          name: "testStringParam",
+          type: "string",
         },
         {
-          "name": "testNumberParam",
-          "type": "number",
+          name: "testNumberParam",
+          type: "number",
         },
         {
           name: "testNullParam",
@@ -277,14 +280,18 @@ describe("readActionArguments", () => {
           name: "testEmptyParam",
           type: "text",
         },
-      ]
+      ],
     };
     const expectedResult = {
       testStringParam: "test string value",
       testNumberParam: 100,
-    }
+    };
+
+    // eslint-disable-next-line no-underscore-dangle
     rewiredHelpers.__set__("loadMethodFromConfiguration", () => minimalMockMethodConfiguration);
-    expect(rewiredHelpers.readActionArguments(mockActionWithCredentialsAndNilValues)).toEqual(expectedResult);
+    expect(
+      rewiredHelpers.readActionArguments(mockActionWithCredentialsAndNilValues),
+    ).toEqual(expectedResult);
   });
 
   test("returns the parameters in expected format properly making use of default parameter if provided", () => {
@@ -294,44 +301,44 @@ describe("readActionArguments", () => {
       },
       params: {
         noDefaultParam: "No default",
-        defaultParam: "This value should overwrite default one"
-      }
+        defaultParam: "This value should overwrite default one",
+      },
     };
     const mockMethod = {
-      "name": "testMethod",
-      "viewName": "Test method",
-      "params": [
+      name: "testMethod",
+      viewName: "Test method",
+      params: [
         {
-          "name": "AWS_ACCESS_KEY_ID",
-          "type": "vault",
+          name: "AWS_ACCESS_KEY_ID",
+          type: "vault",
         },
         {
-          "name": "AWS_SECRET_ACCESS_KEY",
-          "type": "vault",
+          name: "AWS_SECRET_ACCESS_KEY",
+          type: "vault",
         },
         {
-          "name": "REGION",
-          "type": "autocomplete",
+          name: "REGION",
+          type: "autocomplete",
         },
         {
-          "name": "noDefaultParam",
-          "type": "string",
+          name: "noDefaultParam",
+          type: "string",
         },
         {
-          "name": "noDefaultNoValueParam",
-          "type": "string",
+          name: "noDefaultNoValueParam",
+          type: "string",
         },
         {
-          "name": "defaultParam",
-          "type": "string",
-          "default": "some default value",
+          name: "defaultParam",
+          type: "string",
+          default: "some default value",
         },
         {
-          "name": "defaultNoValueParam",
-          "type": "string",
-          "default": "this default value should be returned",
+          name: "defaultNoValueParam",
+          type: "string",
+          default: "this default value should be returned",
         },
-      ]
+      ],
     };
     const expectedResult = {
       noDefaultParam: "No default",
@@ -339,53 +346,54 @@ describe("readActionArguments", () => {
       defaultNoValueParam: "this default value should be returned",
     };
 
+    // eslint-disable-next-line no-underscore-dangle
     rewiredHelpers.__set__("loadMethodFromConfiguration", () => mockMethod);
     expect(rewiredHelpers.readActionArguments(mockAction)).toEqual(expectedResult);
   });
 
   test("throws if the required parameter is missing", () => {
     const mockMethod = {
-      "name": "testMethod",
-      "viewName": "Test method",
-      "params": [
+      name: "testMethod",
+      viewName: "Test method",
+      params: [
         {
-          "name": "AWS_ACCESS_KEY_ID",
-          "type": "vault",
+          name: "AWS_ACCESS_KEY_ID",
+          type: "vault",
         },
         {
-          "name": "AWS_SECRET_ACCESS_KEY",
-          "type": "vault",
+          name: "AWS_SECRET_ACCESS_KEY",
+          type: "vault",
         },
         {
-          "name": "REGION",
-          "type": "autocomplete",
+          name: "REGION",
+          type: "autocomplete",
         },
         {
-          "name": "paramRequiredWithValue",
-          "type": "string",
-          "required": true,
+          name: "paramRequiredWithValue",
+          type: "string",
+          required: true,
         },
         {
-          "name": "paramRequiredWithDefaultValue",
-          "type": "string",
-          "default": "this is a default value",
-          "required": true,
+          name: "paramRequiredWithDefaultValue",
+          type: "string",
+          default: "this is a default value",
+          required: true,
         },
-      ]
+      ],
     };
     const getAction = (params) => ({
       method: {
         name: "testMethod",
       },
-      params
+      params,
     });
 
-    const properAction = getAction({ paramRequiredWithValue: "proper value", paramRequiredWithDefaultValue: "some other value"});
-    const anotherProperAction = getAction({ paramRequiredWithValue: "proper value"});
+    const properAction = getAction({ paramRequiredWithValue: "proper value", paramRequiredWithDefaultValue: "some other value" });
+    const anotherProperAction = getAction({ paramRequiredWithValue: "proper value" });
     const improperAction = getAction({ paramRequiredWithValue: "" });
     const anotherImproperAction = getAction({});
 
-
+    // eslint-disable-next-line no-underscore-dangle
     rewiredHelpers.__set__("loadMethodFromConfiguration", () => mockMethod);
     expect(() => rewiredHelpers.readActionArguments(properAction)).not.toThrowError(/Missing required ".*" value/);
     expect(() => rewiredHelpers.readActionArguments(anotherProperAction)).not.toThrowError(/Missing required ".*" value/);
@@ -403,7 +411,7 @@ describe("buildTagSpecification", () => {
       Tags: [
         { Key: "test1", Value: "value1" },
         { Key: "test2", Value: "value2" },
-      ]
+      ],
     }];
 
     expect(helpers.buildTagSpecification(resourceType, tagsString)).toStrictEqual(expectedValue);
@@ -419,7 +427,7 @@ describe("buildTagSpecification", () => {
         { Key: "test2", Value: "value2" },
         { Key: "test3", Value: "value3" },
         { Key: "test4", Value: "value4" },
-      ]
+      ],
     }];
 
     expect(helpers.buildTagSpecification(resourceType, tagsString)).toStrictEqual(expectedValue);
@@ -445,18 +453,18 @@ describe("prepareParametersForAnotherMethodCall", () => {
 
   test("properly builds parameters compatible with another method based on provided ones by limiting the extra ones", () => {
     const methodDefinition = {
-      "name": "testMethod",
-      "viewName": "Test method",
-      "params": [
+      name: "testMethod",
+      viewName: "Test method",
+      params: [
         {
-          "name": "param2",
-          "type": "string",
+          name: "param2",
+          type: "string",
         },
         {
-          "name": "param3",
-          "type": "string",
+          name: "param3",
+          type: "string",
         },
-      ]
+      ],
     };
     const paramsToConvert = {
       param1: "value1",
@@ -470,24 +478,25 @@ describe("prepareParametersForAnotherMethodCall", () => {
       param3: "value3",
     };
 
+    // eslint-disable-next-line no-underscore-dangle
     rewiredHelpers.__set__("loadMethodFromConfiguration", () => methodDefinition);
     expect(rewiredHelpers.prepareParametersForAnotherMethodCall("testMethod", paramsToConvert)).toEqual(expectedParams);
   });
 
   test("properly builds parameters compatible with another method based on provided and additional ones", () => {
     const methodDefinition = {
-      "name": "testMethod",
-      "viewName": "Test method",
-      "params": [
+      name: "testMethod",
+      viewName: "Test method",
+      params: [
         {
-          "name": "param2",
-          "type": "string",
+          name: "param2",
+          type: "string",
         },
         {
-          "name": "someOtherParam",
-          "type": "string",
+          name: "someOtherParam",
+          type: "string",
         },
-      ]
+      ],
     };
     const paramsToConvert = {
       param1: "value1",
@@ -504,6 +513,7 @@ describe("prepareParametersForAnotherMethodCall", () => {
       someOtherParam: "some other param",
     };
 
+    // eslint-disable-next-line no-underscore-dangle
     rewiredHelpers.__set__("loadMethodFromConfiguration", () => methodDefinition);
     expect(rewiredHelpers.prepareParametersForAnotherMethodCall("testMethod", paramsToConvert, additionalParams)).toEqual(expectedParams);
   });

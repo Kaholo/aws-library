@@ -11,7 +11,7 @@ const expectSortedArrayOfAutocompleteObjects = (result, unsortedExpectedValues) 
   expect(result).toHaveLength(unsortedExpectedValues.length);
   result.forEach(expectProperAutocompleteObject);
 
-  const allItemsValues = result.map(({value}) => value);
+  const allItemsValues = result.map(({ value }) => value);
   expect(allItemsValues).toStrictEqual(unsortedExpectedValues.sort());
 };
 
@@ -25,7 +25,7 @@ const autocompleteActionParams = [
     type: "number",
     name: "TestNumber",
     value: "100",
-  }
+  },
 ];
 
 const autocompletePluginSettings = [
@@ -38,7 +38,7 @@ const autocompletePluginSettings = [
     valueType: "number",
     name: "TestSettingNumber",
     value: "300",
-  }
+  },
 ];
 
 describe("mapAutocompleteFuncToObject", () => {
@@ -54,31 +54,39 @@ describe("mapAutocompleteFuncToObject", () => {
     expect(allKeysAndValues).not.toContain(null);
     expect(allKeysAndValues).not.toContain(undefined);
     expect(allKeysAndValues).not.toContain(NaN);
-  }
+  };
 
   test("works as expected for pluginParams data format", () => {
-    const returnedObjectForParams = autocomplete.mapAutocompleteFuncParamsToObject(autocompleteActionParams);
+    const returnedObjectForParams = (
+      autocomplete.mapAutocompleteFuncParamsToObject(autocompleteActionParams)
+    );
     expectObjectToNotBeEmptyAndToNotContainNilKeysNorValues(returnedObjectForParams);
   });
 
   test("works as expected for pluginSettings data format", () => {
-    const returnedObjectForSettings = autocomplete.mapAutocompleteFuncParamsToObject(autocompletePluginSettings);
+    const returnedObjectForSettings = (
+      autocomplete.mapAutocompleteFuncParamsToObject(autocompletePluginSettings)
+    );
     expectObjectToNotBeEmptyAndToNotContainNilKeysNorValues(returnedObjectForSettings);
   });
 
   test("properly converts array of values into object with correct keys and parsed values", () => {
     const expectedResultForParams = {
       TestField: "test value",
-      TestNumber: 100
-    }
+      TestNumber: 100,
+    };
 
     const expectedResultForSettings = {
       TestSetting: "test setting value",
-      TestSettingNumber: 300
-    }
+      TestSettingNumber: 300,
+    };
 
-    const returnedObjectForParam = autocomplete.mapAutocompleteFuncParamsToObject(autocompleteActionParams);
-    const returnedObjectForSettings = autocomplete.mapAutocompleteFuncParamsToObject(autocompletePluginSettings);
+    const returnedObjectForParam = (
+      autocomplete.mapAutocompleteFuncParamsToObject(autocompleteActionParams)
+    );
+    const returnedObjectForSettings = (
+      autocomplete.mapAutocompleteFuncParamsToObject(autocompletePluginSettings)
+    );
 
     expect(returnedObjectForParam).toStrictEqual(expectedResultForParams);
     expect(returnedObjectForSettings).toStrictEqual(expectedResultForSettings);
@@ -95,7 +103,7 @@ describe("mapAutocompleteFuncToObject", () => {
         type: "number",
         name: "TestNumber",
         value: "100",
-      }
+      },
     ];
 
     const wrongTypePluginSettings = [
@@ -108,7 +116,7 @@ describe("mapAutocompleteFuncToObject", () => {
         valueType: "unknown type",
         name: "TestSettingNumber",
         value: "300",
-      }
+      },
     ];
 
     expect(() => autocomplete.mapAutocompleteFuncParamsToObject(wrongTypeActionParams))
@@ -128,12 +136,23 @@ describe("mapAutocompleteFuncToObject", () => {
     const arrayNotFilledWithObjectsErrorMessage = "Failed to map autocomplete parameters to object - every item of params array need to be an object";
     const notArrayErrorMessage = "Failed to map autocomplete parameters to object – params provided are not an array";
 
-    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(array)).toThrowError(arrayNotFilledWithObjectsErrorMessage);
-    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(singleObjectInParamsFormat)).toThrowError(notArrayErrorMessage);
-    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(singleObjectInDifferentFormat)).toThrowError(notArrayErrorMessage);
-    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(string)).toThrowError(notArrayErrorMessage);
-    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(number)).toThrowError(notArrayErrorMessage);
-    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(boolean)).toThrowError(notArrayErrorMessage);
+    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(array))
+      .toThrowError(arrayNotFilledWithObjectsErrorMessage);
+
+    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(singleObjectInParamsFormat))
+      .toThrowError(notArrayErrorMessage);
+
+    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(singleObjectInDifferentFormat))
+      .toThrowError(notArrayErrorMessage);
+
+    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(string))
+      .toThrowError(notArrayErrorMessage);
+
+    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(number))
+      .toThrowError(notArrayErrorMessage);
+
+    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(boolean))
+      .toThrowError(notArrayErrorMessage);
   });
 
   test("throws when params passed are missing fields", () => {
@@ -143,15 +162,17 @@ describe("mapAutocompleteFuncToObject", () => {
     }];
     const paramsWithMissingType = [{
       name: "Some field",
-      value: "some text"
+      value: "some text",
     }];
 
     const missingNameErrorMessage = "Failed to map one of autocomplete parameters to object - `name` field is required";
     const missingTypeErrorMessage = "Failed to map one of autocomplete parameters to object - either `type` or `valueType` field is required";
 
-    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(paramsWithMissingName)).toThrowError(missingNameErrorMessage);
-    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(paramsWithMissingType)).toThrowError(missingTypeErrorMessage);
+    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(paramsWithMissingName))
+      .toThrowError(missingNameErrorMessage);
 
+    expect(() => autocomplete.mapAutocompleteFuncParamsToObject(paramsWithMissingType))
+      .toThrowError(missingTypeErrorMessage);
   });
 });
 
@@ -163,7 +184,7 @@ describe("listRegions", () => {
     expect(regions.every(_.isObject)).toBe(true);
 
     regions.forEach((region) => {
-      const keysAndValues = [ ..._.keys(region), ..._.values(region) ];
+      const keysAndValues = [..._.keys(region), ..._.values(region)];
       expect(keysAndValues).not.toContain(null);
       expect(keysAndValues).not.toContain(undefined);
       expect(keysAndValues).not.toContain(NaN);
@@ -191,22 +212,22 @@ describe("listRegions", () => {
 
 describe("getRegionLabel", () => {
   test("returns correct label for given region", () => {
-    const regionIds = consts.ALL_AWS_REGIONS.map(region => region.regionId);
-    const regionLabels = consts.ALL_AWS_REGIONS.map(region => region.regionLabel);
+    const regionIds = consts.ALL_AWS_REGIONS.map((region) => region.regionId);
+    const regionLabels = consts.ALL_AWS_REGIONS.map((region) => region.regionLabel);
 
-    regionIds.forEach((id, index) =>
+    regionIds.forEach((id, index) => (
       expect(autocomplete.getRegionLabel(id)).toEqual(regionLabels[index])
-    );
+    ));
   });
 
   test("throws if incorrect regionId provided", () => {
-    const expectedErrorMessage = `Could not find a region label for region id: "unknown_region"`;
+    const expectedErrorMessage = "Could not find a region label for region id: \"unknown_region\"";
     expect(() => autocomplete.getRegionLabel("unknown_region")).toThrowError(expectedErrorMessage);
   });
 });
 
 describe("autocompleteListFromAwsCall", () => {
-  const listOfStrings = [ "test value3", "test value1", "value2" ];
+  const listOfStrings = ["test value3", "test value1", "value2"];
   const listOfObjects = [
     {
       name: "name 3",
@@ -219,20 +240,20 @@ describe("autocompleteListFromAwsCall", () => {
     {
       name: "name 2",
       value: "value2",
-    }
+    },
   ];
 
   const mockClient = {
     listFunctionReturningArray: jest.fn().mockImplementation(() => ({
-      promise: () => Promise.resolve(listOfStrings)
+      promise: () => Promise.resolve(listOfStrings),
     })),
 
     listFunctionReturningObjectWithArray: jest.fn().mockImplementation(() => ({
-      promise: () => Promise.resolve({ functionResult: listOfStrings })
+      promise: () => Promise.resolve({ functionResult: listOfStrings }),
     })),
 
     listFunctionReturningObjectWithArrayOfObjects: jest.fn().mockImplementation(() => ({
-      promise: () => Promise.resolve({ functionResult: listOfObjects })
+      promise: () => Promise.resolve({ functionResult: listOfObjects }),
     })),
   };
 
@@ -248,8 +269,8 @@ describe("autocompleteListFromAwsCall", () => {
         "nonExistentPath2",
       );
 
-      const noPathToArrayErrorMessage = `Path "nonExistentPath" doesn't exist on method call response`;
-      const noPathToValueErrorMessage = `Path "nonExistentPath2" doesn't exist on elements of array`;
+      const noPathToArrayErrorMessage = "Path \"nonExistentPath\" doesn't exist on method call response";
+      const noPathToValueErrorMessage = "Path \"nonExistentPath2\" doesn't exist on elements of array";
 
       await expect(() => autocompleteFunction("", [], mockClient)).rejects.toThrowError(noPathToArrayErrorMessage);
       await expect(() => anotherAutocompleteFunction("", [], mockClient)).rejects.toThrowError(noPathToValueErrorMessage);
@@ -265,7 +286,7 @@ describe("autocompleteListFromAwsCall", () => {
       test("if client method returns an object and proper path to array is provided", async () => {
         const autocompleteFunction = autocomplete.autocompleteListFromAwsCall(
           "listFunctionReturningObjectWithArray",
-          "functionResult"
+          "functionResult",
         );
         const functionResult = await autocompleteFunction("", [], mockClient);
         expectSortedArrayOfAutocompleteObjects(functionResult, listOfStrings);
@@ -275,10 +296,13 @@ describe("autocompleteListFromAwsCall", () => {
         const autocompleteFunction = autocomplete.autocompleteListFromAwsCall(
           "listFunctionReturningObjectWithArrayOfObjects",
           "functionResult",
-          "value"
+          "value",
         );
         const functionResult = await autocompleteFunction("", [], mockClient);
-        expectSortedArrayOfAutocompleteObjects(functionResult, listOfObjects.map(({ value }) => value));
+        expectSortedArrayOfAutocompleteObjects(
+          functionResult,
+          listOfObjects.map(({ value }) => value),
+        );
       });
     });
 
@@ -293,7 +317,7 @@ describe("autocompleteListFromAwsCall", () => {
   test("returns a function that throws if method not exists", async () => {
     const autocompleteFunction = autocomplete.autocompleteListFromAwsCall("nonExistentMethod");
 
-    const noMethodErrorMessage = `Method "nonExistentMethod" doesn't exist on service`;
+    const noMethodErrorMessage = "Method \"nonExistentMethod\" doesn't exist on service";
     await expect(() => autocompleteFunction("", [], mockClient)).rejects.toThrowError(noMethodErrorMessage);
   });
 });
@@ -308,7 +332,7 @@ describe("filterItemsByQuery", () => {
     { id: "id6", value: "test value6" },
   ];
 
-  const allAutocompleteItemsValues = autocompleteItems.map(({value}) => value);
+  const allAutocompleteItemsValues = autocompleteItems.map(({ value }) => value);
 
   test("only sort the list if no query provided", () => {
     const resultArray = autocomplete.filterItemsByQuery(autocompleteItems);
@@ -345,11 +369,11 @@ describe("filterItemsByQuery", () => {
 
   test("limits the number of returned values to defined default value", () => {
     const veryLongAutocompleteItemsArray = [];
-    for (let i = 0; i < 10000; i++) {
+    for (let i = 0; i < 10000; i += 1) {
       veryLongAutocompleteItemsArray.push({
-        id: "id" + i.toString(),
-        value: "value" + i.toString(),
-      })
+        id: `id${i.toString()}`,
+        value: `value${i.toString()}`,
+      });
     }
 
     const resultArray = autocomplete.filterItemsByQuery(veryLongAutocompleteItemsArray);
@@ -370,4 +394,4 @@ describe("toAutocompleteItemFromPrimitive", () => {
     expect(autocompleteItemFromPrimitive.id).toEqual("testItem");
     expect(autocompleteItemFromPrimitive.value).toEqual("testLabel");
   });
-})
+});

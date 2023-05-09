@@ -33,8 +33,7 @@ function mapAutocompleteFuncParamsToObject(params) {
 }
 
 function listRegions(query = "") {
-  const autocompleteList = consts.ALL_AWS_REGIONS.map(({ regionId, regionLabel }) =>
-    toAutocompleteItemFromPrimitive(regionId, `${regionId} - ${regionLabel}`));
+  const autocompleteList = consts.ALL_AWS_REGIONS.map(({ regionId, regionLabel }) => toAutocompleteItemFromPrimitive(regionId, `${regionId} - ${regionLabel}`));
 
   return filterItemsByQuery(autocompleteList, query);
 }
@@ -42,7 +41,7 @@ function listRegions(query = "") {
 function getRegionLabel(regionId) {
   const foundRegion = consts.ALL_AWS_REGIONS.find((region) => region.regionId === regionId);
   if (_.isNil(foundRegion)) {
-    throw new Error(`Could not find a region label for region id: "${regionId}"`)
+    throw new Error(`Could not find a region label for region id: "${regionId}"`);
   }
   return foundRegion.regionLabel;
 }
@@ -62,7 +61,7 @@ function autocompleteListFromAwsCall(listFuncName, pathToArray = "", pathToValue
         if (pathToValue !== "" && (_.isArray(object) || !_.has(object, pathToValue))) {
           throw new Error(`Path "${pathToValue}" doesn't exist on elements of array`);
         }
-        return toAutocompleteItemFromPrimitive(pathToValue === "" ? object : _.get(object, pathToValue))
+        return toAutocompleteItemFromPrimitive(pathToValue === "" ? object : _.get(object, pathToValue));
       });
 
     return filterItemsByQuery(autocompleteItems, query);
@@ -70,7 +69,9 @@ function autocompleteListFromAwsCall(listFuncName, pathToArray = "", pathToValue
 }
 
 function filterItemsByQuery(autocompleteItems, query) {
-  if (!query) { return sliceAndSortItems(autocompleteItems); }
+  if (!query) {
+    return sliceAndSortItems(autocompleteItems);
+  }
 
   const queryWords = query.split(/[. ]/g).map(_.toLower);
   const filteredResult = autocompleteItems.filter((item) => {

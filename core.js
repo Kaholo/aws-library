@@ -18,7 +18,12 @@ function generateAwsMethod(functionName, payloadFunction = null) {
   };
 }
 
-function bootstrap(awsService, pluginMethods, autocompleteFuncs = {}, credentialLabels = consts.DEFAULT_CREDENTIAL_LABELS) {
+function bootstrap(
+  awsService,
+  pluginMethods,
+  autocompleteFuncs = {},
+  credentialLabels = consts.DEFAULT_CREDENTIAL_LABELS,
+) {
   const bootstrappedPluginMethods = _.entries(pluginMethods)
     .map(([methodName, awsMethod]) => ({
       [methodName]: generatePluginMethod(awsService, awsMethod, credentialLabels),
@@ -40,13 +45,24 @@ function generateAutocompleteFunction(awsService, autocompleteFunction, credenti
     const awsServiceClient = getServiceInstance(awsService, params, settings, credentialLabels);
     const region = helpers.readRegion(params, settings, credentialLabels.REGION);
 
-    return autocompleteFunction(query, params, awsServiceClient, region, { pluginSettings, actionParams });
+    return autocompleteFunction(
+      query,
+      params,
+      awsServiceClient,
+      region,
+      { pluginSettings, actionParams },
+    );
   };
 }
 
 function generatePluginMethod(awsService, pluginMethod, credentialLabels) {
   return async (action, settings) => {
-    const awsServiceClient = getServiceInstance(awsService, action.params, settings, credentialLabels);
+    const awsServiceClient = getServiceInstance(
+      awsService,
+      action.params,
+      settings,
+      credentialLabels,
+    );
     const params = helpers.readActionArguments(action, credentialLabels);
     const region = helpers.readRegion(action.params, settings, credentialLabels.REGION);
 

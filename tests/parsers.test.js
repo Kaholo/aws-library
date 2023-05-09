@@ -4,10 +4,10 @@ describe("Object parser", () => {
   const properObject = {
     stringParam: "first",
     numberParam: 123,
-    arrayParam: [1,2,3,4],
+    arrayParam: [1, 2, 3, 4],
     objectParam: {
-      test: "param"
-    }
+      test: "param",
+    },
   };
 
   test("returns an argument if proper object passed", () => {
@@ -15,7 +15,7 @@ describe("Object parser", () => {
   });
 
   test("returns parsed object if proper JSON passed", () => {
-    const json = `{"stringParam":"first","numberParam":123,"arrayParam":[1,2,3,4],"objectParam":{"test":"param"}}`;
+    const json = "{\"stringParam\":\"first\",\"numberParam\":123,\"arrayParam\":[1,2,3,4],\"objectParam\":{\"test\":\"param\"}}";
     expect(parsers.object(json)).toStrictEqual(properObject);
   });
 
@@ -24,12 +24,12 @@ describe("Object parser", () => {
   });
 
   test("throws if valid JSON passed and parsed value is not an object", () => {
-    const expectedErrorMessage = `Couldn't parse provided value as object: string-value`;
+    const expectedErrorMessage = "Couldn't parse provided value as object: string-value";
     expect(() => parsers.object("string-value")).toThrowError(expectedErrorMessage);
   });
 
   test("throws if neither object nor JSON string passed", () => {
-    const expectedErrorMessage = `123 is not a valid object`;
+    const expectedErrorMessage = "123 is not a valid object";
     expect(() => parsers.object(123)).toThrowError(expectedErrorMessage);
   });
 });
@@ -48,17 +48,17 @@ describe("Number parser", () => {
   });
 
   test("throws if Infinity passed", () => {
-    const expectedErrorMessage = `Value Infinity is not a valid number`;
-    expect(() => parsers.number(1/0)).toThrowError(expectedErrorMessage);
+    const expectedErrorMessage = "Value Infinity is not a valid number";
+    expect(() => parsers.number(1 / 0)).toThrowError(expectedErrorMessage);
   });
 
   test("throws if NaN passed", () => {
-    const expectedErrorMessage = `Value NaN is not a valid number`;
-    expect(() => parsers.number(1/"nan")).toThrowError(expectedErrorMessage);
+    const expectedErrorMessage = "Value NaN is not a valid number";
+    expect(() => parsers.number(1 / "nan")).toThrowError(expectedErrorMessage);
   });
 
   test("throws if another value type is passed", () => {
-    const expectedErrorMessage = `Value [object Object] is not a valid number`;
+    const expectedErrorMessage = "Value [object Object] is not a valid number";
     expect(() => parsers.number({})).toThrowError(expectedErrorMessage);
   });
 });
@@ -91,7 +91,7 @@ describe("Boolean parser", () => {
   });
 
   test("throws if value is not of type boolean", () => {
-    const expectedErrorMessage = `Value 123 is not of type boolean`;
+    const expectedErrorMessage = "Value 123 is not of type boolean";
     expect(() => parsers.boolean(123)).toThrowError(expectedErrorMessage);
   });
 });
@@ -108,7 +108,7 @@ describe("String parser", () => {
   });
 
   test("throws if something else passed", () => {
-    const expectedErrorMessage = `Value 123 is not a valid string`;
+    const expectedErrorMessage = "Value 123 is not a valid string";
     expect(() => parsers.string(123)).toThrowError(expectedErrorMessage);
   });
 });
@@ -132,14 +132,14 @@ describe("Autocomplete parser", () => {
   });
 
   test("throws if another kind of value passed", () => {
-    const expectedErrorMessage = `Value "[object Object]" is not a valid autocomplete result nor string.`;
+    const expectedErrorMessage = "Value \"[object Object]\" is not a valid autocomplete result nor string.";
     expect(() => parsers.autocomplete({})).toThrowError(expectedErrorMessage);
-  })
+  });
 });
 
 describe("Array parser", () => {
   test("returns argument if proper array passed", () => {
-    expect(parsers.array([1,2,3,4])).toStrictEqual([1,2,3,4]);
+    expect(parsers.array([1, 2, 3, 4])).toStrictEqual([1, 2, 3, 4]);
   });
 
   test("return empty array if null / undefined passed", () => {
@@ -172,7 +172,7 @@ describe("Tags parser", () => {
   const properTagsArray = [
     { Key: "First tag", Value: "First_value" },
     { Key: "Middle-tag", Value: "Middlevalue" },
-    { Key: "Last.tag", Value: "Last#value" }
+    { Key: "Last.tag", Value: "Last#value" },
   ];
 
   const anotherTagsString = "anotherTag=anotherValue\nyetAnotherTag=someValue";
@@ -185,7 +185,7 @@ describe("Tags parser", () => {
     "First tag": "First_value",
     "Middle-tag": "Middlevalue",
     "Last.tag": "Last#value",
-  }
+  };
 
   test("returns an array with argument if proper tag object passed", () => {
     const parsed = parsers.tags(tagObject);
@@ -219,7 +219,7 @@ describe("Tags parser", () => {
   });
 
   test("throws if string in incorrect format passed", () => {
-    const expectedErrorMessage = `Incorrectly formatted tag string: someText`;
+    const expectedErrorMessage = "Incorrectly formatted tag string: someText";
     expect(() => parsers.tags("someText")).toThrowError(expectedErrorMessage);
   });
 

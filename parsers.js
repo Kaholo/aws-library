@@ -29,7 +29,9 @@ function resolveParser(type) {
 }
 
 function object(value) {
-  if (_.isObject(value)) { return value; }
+  if (_.isObject(value)) {
+    return value;
+  }
   if (_.isString(value)) {
     try {
       return JSON.parse(value);
@@ -41,7 +43,7 @@ function object(value) {
 }
 
 function number(value) {
-  const validNumber = (value) => _.isNumber(value) && _.isFinite(value) && !_.isNaN(value);
+  const validNumber = (v) => _.isNumber(v) && _.isFinite(v) && !_.isNaN(v);
   if (validNumber(value)) {
     return value;
   }
@@ -54,32 +56,54 @@ function number(value) {
 }
 
 function boolean(value) {
-  if (_.isNil(value)) { return false; }
-  if (_.isBoolean(value)) { return value; }
+  if (_.isNil(value)) {
+    return false;
+  }
+  if (_.isBoolean(value)) {
+    return value;
+  }
   if (_.isString(value)) {
     const stringValue = value.toLowerCase().trim();
-    if (["", "false"].includes(stringValue)) { return false; }
-    if (stringValue === "true") { return true; }
+    if (["", "false"].includes(stringValue)) {
+      return false;
+    }
+    if (stringValue === "true") {
+      return true;
+    }
   }
   throw new Error(`Value ${value} is not of type boolean`);
 }
 
 function string(value) {
-  if (_.isNil(value)) { return ""; }
-  if (_.isString(value)) { return value; }
+  if (_.isNil(value)) {
+    return "";
+  }
+  if (_.isString(value)) {
+    return value;
+  }
   throw new Error(`Value ${value} is not a valid string`);
 }
 
 function autocomplete(value) {
-  if (_.isNil(value)) { return ""; }
-  if (_.isString(value)) { return value; }
-  if (_.isObject(value) && _.has(value, "id")) { return value.id; }
+  if (_.isNil(value)) {
+    return "";
+  }
+  if (_.isString(value)) {
+    return value;
+  }
+  if (_.isObject(value) && _.has(value, "id")) {
+    return value.id;
+  }
   throw new Error(`Value "${value}" is not a valid autocomplete result nor string.`);
 }
 
 function array(value) {
-  if (_.isNil(value)) { return []; }
-  if (_.isArray(value)) { return value; }
+  if (_.isNil(value)) {
+    return [];
+  }
+  if (_.isArray(value)) {
+    return value;
+  }
   if (_.isString(value)) {
     return _.compact(
       value.split("\n").map(_.trim),
@@ -91,7 +115,9 @@ function array(value) {
 const isTagObject = (t) => _.has(t, "Key") && _.has(t, "Value") && _.keys(t).length === 2;
 
 function tag(value) {
-  if (_.isNil(value)) { throw new Error("Cannot null or undefined tag!"); }
+  if (_.isNil(value)) {
+    throw new Error("Cannot null or undefined tag!");
+  }
 
   if (_.isObject(value) && isTagObject(value)) {
     return value;
@@ -114,7 +140,9 @@ function tagsString(value) {
 }
 
 function tags(value) {
-  if (_.isNil(value)) { return []; }
+  if (_.isNil(value)) {
+    return [];
+  }
   if (_.isArray(value)) {
     if (_.every(value, _.isObject)) {
       return value.map(tag);
@@ -128,8 +156,10 @@ function tags(value) {
     return tagsString(value);
   }
   if (_.isObject(value)) {
-    if (isTagObject(value)) { return [ value ]; }
-    return _.entries(value).map(([Key, Value]) => ({ Key: Key.trim(), Value: Value.trim()}));
+    if (isTagObject(value)) {
+      return [value];
+    }
+    return _.entries(value).map(([Key, Value]) => ({ Key: Key.trim(), Value: Value.trim() }));
   }
   throw new Error("Unsupported tags format!");
 }
