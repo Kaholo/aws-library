@@ -168,23 +168,6 @@ An AWS compatible tag specification object structured as follows:
 
 ---
 
-## prepareParametersForAnotherMethodCall
-```js
-function prepareParametersForAnotherMethodCall(methodName, params, additionalParams = {})
-```
-
-Creates a parameters object for another plugin method call based on current method's parameters. This is useful in case you need to call plugin method from within another plugin method. See EC2 plugin's `createRouteTableWorkflow` for example usage.
-
-### Parameters
-`methodName` (_string_) – plugin method name that the parameters are supposed to be used with for
-`params` (_object_) – current method parameters
-`additionalParams` (_object_) – additional parameters to be included
-
-### Returned value
-Parsed parameters compatible with destination `methodName` plugin method. The returned object will only contain those parameters that are defined for the destination method in `config.json`, any other value from `params` or `additionalParams` will be stripped.
-
----
-
 :warning: **The functions below are meant to be used with raw action parameters and settings provided from Kaholo platform. If you intend to use  `bootstrap` function and benefit from automatically parsed parameters, then you shouldn't use those** :warning:
 
 ## removeCredentials
@@ -232,88 +215,6 @@ Retrieves parsed region from parameters or settings.
 String cotaining selected region.
 
 ---
-
-## readActionArguments
-```js
-function readActionArguments(  
- action,  
- credentialLabels = consts.DEFAULT_CREDENTIAL_LABELS,  
-)
-```
-
-Retrieves and  parses the action parameters based on `config.json` definitions.
-
-### Parameters
-`action` (_object_) – raw action object
-`credentialLabels` (_object_) – Object that specifies what labels to search for. The default value is defined as follows:
-```json
-"DEFAULT_CREDENTIAL_LABELS": {
-    "ACCESS_KEY": "AWS_ACCESS_KEY_ID",
-    "SECRET_KEY": "AWS_SECRET_ACCESS_KEY",
-    "REGION": "REGION"
-}
-```
-
-### Returned value
-An object containing all of the action parameters with parsed values.
-> :information_source: **Note**:<br/>
-> This function calls `removeCredentials` function internally for security reasons, so the returned object will not contain any credentials.
-
-# Parsers
-Kaholo AWS Library exports the same parsers as Kaholo Plugin Library with the addition of the following:
-
-## tags
-
-```js
-function tags(value)
-```
-
-### Parameters
-`value` (_string_, _array of strings_, _object_ or _array of objects_) – value to be parsed. This value can be in the form of:
-- String – new line separated strings in the format `KEY=VALUE`, for example:
-```
-name=my-instance
-created_by=developer
-purpose=sandbox
-```
-
-- Array of strings – an array containing any number of strings defined as above
-- Object - an object in the form of:
-```js
-{
-	"Key": "Name",
-	"Value": "my-instance"
-}
-```
-
-or
-
-```js
-{
-	"name": "my-instance",
-	"created_by": "developer",
-// ...
-}
-```
-
-- Array of objects – an array containing any number of objects defined as above
-
-### Returned value
-An array of objects in tag format supported by AWS:
-```js
-[
-	{
-		"Key": "name",
-		"Value": "my-instance"
-	},
-	{
-		"Key": "created_by",
-		"Value": "developer"
-	},
-	// ...
-]
-```
-
 
 # Autocomplete
 
