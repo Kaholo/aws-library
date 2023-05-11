@@ -14,7 +14,7 @@ function readRegion(
   if (!_.has(params, label)) {
     throw new Error(`No region has been found under "${label}" in params.`);
   }
-  return params[label];
+  return parsers.autocomplete(params[label]);
 }
 
 function readCredentials(
