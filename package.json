@@ -27,6 +27,7 @@
     "rewire": "6.0.0"
   },
   "dependencies": {
+    "@kaholo/plugin-library": "^2.1.2",
     "aws-sdk": "2.1072.0",
     "lodash": "4.17.21"
   }
