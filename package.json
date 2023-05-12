@@ -23,10 +23,10 @@
     "eslint": "8.8.0",
     "eslint-config-airbnb-base": "15.0.0",
     "eslint-plugin-import": "2.25.4",
-    "jest": "27.5.0",
-    "rewire": "6.0.0"
+    "jest": "27.5.0"
   },
   "dependencies": {
+    "@kaholo/plugin-library": "github:Kaholo/kaholo-plugin-library#5ae3e9afcecd1c29026feccd7e95cb234aeb2507",
     "aws-sdk": "2.1072.0",
     "lodash": "4.17.21"
   }
