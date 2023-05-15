@@ -1,6 +1,6 @@
 {
   "name": "@kaholo/aws-plugin-library",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "description": "Kaholo library for aws plugins",
   "main": "aws-plugin-library.js",
   "scripts": {
@@ -23,10 +23,10 @@
     "eslint": "8.8.0",
     "eslint-config-airbnb-base": "15.0.0",
     "eslint-plugin-import": "2.25.4",
-    "jest": "27.5.0",
-    "rewire": "6.0.0"
+    "jest": "27.5.0"
   },
   "dependencies": {
+    "@kaholo/plugin-library": "^2.2.1",
     "aws-sdk": "2.1072.0",
     "lodash": "4.17.21"
   }
