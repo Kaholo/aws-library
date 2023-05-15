@@ -1,6 +1,6 @@
 {
   "name": "@kaholo/aws-plugin-library",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "description": "Kaholo library for aws plugins",
   "main": "aws-plugin-library.js",
   "scripts": {
@@ -26,7 +26,7 @@
     "jest": "27.5.0"
   },
   "dependencies": {
-    "@kaholo/plugin-library": "github:Kaholo/kaholo-plugin-library#5ae3e9afcecd1c29026feccd7e95cb234aeb2507",
+    "@kaholo/plugin-library": "^2.2.1",
     "aws-sdk": "2.1072.0",
     "lodash": "4.17.21"
   }
