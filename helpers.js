@@ -10,12 +10,16 @@ function removeCredentials(params, labels = consts.DEFAULT_CREDENTIAL_LABELS) {
 function readRegion(
   params,
   label = consts.DEFAULT_CREDENTIAL_LABELS.REGION,
+  silent = true,
 ) {
-  if (!_.has(params, label)) {
-    console.warn(`Region parameter not specified, using default value: "${consts.DEFAULT_REGION}"`);
-    return consts.DEFAULT_REGION;
+  if (_.has(params, label)) {
+    return parsers.autocomplete(params[label]);
   }
-  return parsers.autocomplete(params[label]);
+
+  if (!silent) {
+    console.info(`Region parameter not specified, using default value: "${consts.DEFAULT_REGION}"`);
+  }
+  return consts.DEFAULT_REGION;
 }
 
 function readCredentials(

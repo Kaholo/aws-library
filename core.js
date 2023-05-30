@@ -12,12 +12,12 @@ function bootstrap(
 ) {
   const preparedPluginMethods = _.mapValues(pluginMethods, (actionMethod) => (
     (params, ...args) => {
+      const region = helpers.readRegion(params, credentialLabels.REGION, false);
       const awsServiceClient = getServiceInstance(
         awsService,
         params,
         credentialLabels,
       );
-      const region = helpers.readRegion(params, credentialLabels.REGION);
 
       return actionMethod.apply(null, [awsServiceClient, params, region, ...args]);
     }
@@ -25,12 +25,12 @@ function bootstrap(
 
   const preparedAutocompleteFunctions = _.mapValues(autocompleteFuncs, (autocompleteFunction) => (
     (query, params, ...args) => {
+      const region = helpers.readRegion(params, credentialLabels.REGION, false);
       const awsServiceClient = getServiceInstance(
         awsService,
         params,
         credentialLabels,
       );
-      const region = helpers.readRegion(params, credentialLabels.REGION);
 
       return autocompleteFunction.apply(null, [query, params, awsServiceClient, region, ...args]);
     }
