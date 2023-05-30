@@ -24,7 +24,6 @@ function readCredentials(
   const areCredentialsDefined = (
     _.has(params, labels.ACCESS_KEY)
     && _.has(params, labels.SECRET_KEY)
-    && _.has(params, labels.REGION)
   );
   if (!areCredentialsDefined) {
     throw new Error("Credential labels has not been found in params");
