@@ -12,9 +12,9 @@ function readRegion(
   label = consts.DEFAULT_CREDENTIAL_LABELS.REGION,
 ) {
   if (!_.has(params, label)) {
-    throw new Error(`No region has been found under "${label}" in params.`);
+    console.warn(`Region parameter not specified, using default value: "${consts.DEFAULT_REGION}"`);
   }
-  return parsers.autocomplete(params[label]);
+  return _.has(params, label) ? parsers.autocomplete(params[label]) : consts.DEFAULT_REGION;
 }
 
 function readCredentials(

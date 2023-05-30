@@ -30,5 +30,6 @@
     { "regionId": "eu-north-1", "regionLabel": "Europe (Stockholm)" },
     { "regionId": "me-south-1", "regionLabel": "Middle East (Bahrain)" },
     { "regionId": "sa-east-1", "regionLabel": "South America (São Paulo)" }
-  ]
+  ],
+  "DEFAULT_REGION": "us-east-1"
 }
