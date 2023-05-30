@@ -10,11 +10,16 @@ function removeCredentials(params, labels = consts.DEFAULT_CREDENTIAL_LABELS) {
 function readRegion(
   params,
   label = consts.DEFAULT_CREDENTIAL_LABELS.REGION,
+  silent = true,
 ) {
-  if (!_.has(params, label)) {
-    throw new Error(`No region has been found under "${label}" in params.`);
+  if (_.has(params, label)) {
+    return parsers.autocomplete(params[label]);
   }
-  return parsers.autocomplete(params[label]);
+
+  if (!silent) {
+    console.info(`Region parameter not specified, using default value: "${consts.DEFAULT_REGION}"`);
+  }
+  return consts.DEFAULT_REGION;
 }
 
 function readCredentials(
@@ -24,7 +29,6 @@ function readCredentials(
   const areCredentialsDefined = (
     _.has(params, labels.ACCESS_KEY)
     && _.has(params, labels.SECRET_KEY)
-    && _.has(params, labels.REGION)
   );
   if (!areCredentialsDefined) {
     throw new Error("Credential labels has not been found in params");
