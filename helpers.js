@@ -13,8 +13,9 @@ function readRegion(
 ) {
   if (!_.has(params, label)) {
     console.warn(`Region parameter not specified, using default value: "${consts.DEFAULT_REGION}"`);
+    return consts.DEFAULT_REGION;
   }
-  return _.has(params, label) ? parsers.autocomplete(params[label]) : consts.DEFAULT_REGION;
+  return parsers.autocomplete(params[label]);
 }
 
 function readCredentials(
