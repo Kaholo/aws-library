@@ -2,7 +2,9 @@ const _ = require("lodash");
 const consts = require("./consts.json");
 
 function listRegions(query = "") {
-  const autocompleteList = consts.ALL_AWS_REGIONS.map(({ regionId, regionLabel }) => toAutocompleteItemFromPrimitive(regionId, `${regionId} - ${regionLabel}`));
+  const autocompleteList = consts.ALL_AWS_REGIONS.map(({ regionId, regionLabel }) => (
+    toAutocompleteItemFromPrimitive(regionId, `${regionId} - ${regionLabel}`)
+  ));
 
   return filterItemsByQuery(autocompleteList, query);
 }
