@@ -26,7 +26,7 @@
     "jest": "27.5.0"
   },
   "dependencies": {
-    "@kaholo/plugin-library": "github:Kaholo/kaholo-plugin-library#task/KP-1257",
+    "@kaholo/plugin-library": "github:Kaholo/kaholo-plugin-library#75932a27f4c198ac9c61e794934438e6cfea91b0",
     "aws-sdk": "2.1072.0",
     "lodash": "4.17.21"
   }
