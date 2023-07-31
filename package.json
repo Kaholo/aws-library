@@ -1,6 +1,6 @@
 {
   "name": "@kaholo/aws-plugin-library",
-  "version": "3.0.1",
+  "version": "3.1.0",
   "description": "Kaholo library for aws plugins",
   "main": "aws-plugin-library.js",
   "scripts": {
