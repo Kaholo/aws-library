@@ -42,19 +42,16 @@ function bootstrap(
   );
 }
 
-function generateAwsMethod(functionName, payloadFunction = null) {
+function generateAwsMethod(Command, payloadFunction = null) {
   return (awsServiceClient, params, region) => {
-    if (!_.hasIn(awsServiceClient, functionName)) {
-      throw new Error(`No method "${functionName}" found on client!`);
-    }
-
     const payload = helpers.removeUndefinedAndEmpty(
       payloadFunction
         ? payloadFunction(params, region)
         : params,
     );
 
-    return awsServiceClient[functionName](payload).promise();
+    const commandInstance = new Command(payload);
+    return awsServiceClient.send(commandInstance);
   };
 }
 
