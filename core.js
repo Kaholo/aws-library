@@ -43,7 +43,7 @@ function bootstrap(
 }
 
 function generateAwsMethod(Command, payloadFunction = null) {
-  return (awsServiceClient, params, region) => {
+  return async (awsServiceClient, params, region) => {
     const payload = helpers.removeUndefinedAndEmpty(
       payloadFunction
         ? payloadFunction(params, region)
@@ -51,7 +51,8 @@ function generateAwsMethod(Command, payloadFunction = null) {
     );
 
     const commandInstance = new Command(payload);
-    return awsServiceClient.send(commandInstance);
+    const response = await awsServiceClient.send(commandInstance);
+    return _.isPlainObject(response) ? _.omit(response, "$metadata") : response;
   };
 }
 
