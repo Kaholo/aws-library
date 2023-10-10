@@ -81,7 +81,18 @@ function buildTagSpecification(resourceType, tags) {
   }];
 }
 
-const stripAwsResultOffMetadata = (result) => (_.isPlainObject(result) ? _.omit(result, "$metadata") : result);
+const stripAwsResultOffMetadata = (result) => {
+  if (!_.isPlainObject(result)) {
+    return result;
+  }
+
+  return Object.fromEntries(
+    Object
+      .entries(result)
+      .filter(([key]) => key !== "$metadata")
+      .map(([key, value]) => [key, stripAwsResultOffMetadata(value)]),
+  );
+};
 
 module.exports = {
   removeCredentials,
