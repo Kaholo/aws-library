@@ -82,8 +82,12 @@ function buildTagSpecification(resourceType, tags) {
 }
 
 const stripAwsResultOffMetadata = (result) => {
-  if (!_.isPlainObject(result)) {
+  if (!_.isPlainObject(result) && !_.isArray(result)) {
     return result;
+  }
+
+  if (_.isArray(result)) {
+    return result.map(stripAwsResultOffMetadata);
   }
 
   return Object.fromEntries(
