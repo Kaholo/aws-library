@@ -81,10 +81,13 @@ function buildTagSpecification(resourceType, tags) {
   }];
 }
 
+const stripAwsResultOffMetadata = (result) => (_.isPlainObject(result) ? _.omit(result, "$metadata") : result);
+
 module.exports = {
   removeCredentials,
   removeUndefinedAndEmpty,
   readRegion,
   readCredentials,
   buildTagSpecification,
+  stripAwsResultOffMetadata,
 };

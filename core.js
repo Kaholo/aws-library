@@ -11,7 +11,7 @@ function bootstrap(
   credentialLabels = consts.DEFAULT_CREDENTIAL_LABELS,
 ) {
   const preparedPluginMethods = _.mapValues(pluginMethods, (actionMethod) => (
-    (params, ...args) => {
+    async (params, ...args) => {
       const region = helpers.readRegion(params, credentialLabels.REGION, false);
       const awsServiceClient = getServiceInstance(
         awsService,
@@ -19,7 +19,8 @@ function bootstrap(
         credentialLabels,
       );
 
-      return actionMethod.apply(null, [awsServiceClient, params, region, ...args]);
+      const result = await actionMethod.apply(null, [awsServiceClient, params, region, ...args]);
+      return helpers.stripAwsResultOffMetadata(result);
     }
   ));
 
@@ -51,8 +52,7 @@ function generateAwsMethod(Command, payloadFunction = null) {
     );
 
     const commandInstance = new Command(payload);
-    const response = await awsServiceClient.send(commandInstance);
-    return _.isPlainObject(response) ? _.omit(response, "$metadata") : response;
+    return awsServiceClient.send(commandInstance);
   };
 }
 
