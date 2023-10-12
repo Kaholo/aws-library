@@ -11,7 +11,7 @@ function bootstrap(
   credentialLabels = consts.DEFAULT_CREDENTIAL_LABELS,
 ) {
   const preparedPluginMethods = _.mapValues(pluginMethods, (actionMethod) => (
-    (params, ...args) => {
+    async (params, ...args) => {
       const region = helpers.readRegion(params, credentialLabels.REGION, false);
       const awsServiceClient = getServiceInstance(
         awsService,
@@ -19,7 +19,8 @@ function bootstrap(
         credentialLabels,
       );
 
-      return actionMethod.apply(null, [awsServiceClient, params, region, ...args]);
+      const result = await actionMethod.apply(null, [awsServiceClient, params, region, ...args]);
+      return helpers.stripAwsResultOffMetadata(result);
     }
   ));
 
@@ -42,19 +43,16 @@ function bootstrap(
   );
 }
 
-function generateAwsMethod(functionName, payloadFunction = null) {
-  return (awsServiceClient, params, region) => {
-    if (!_.hasIn(awsServiceClient, functionName)) {
-      throw new Error(`No method "${functionName}" found on client!`);
-    }
-
+function generateAwsMethod(Command, payloadFunction = null) {
+  return async (awsServiceClient, params, region) => {
     const payload = helpers.removeUndefinedAndEmpty(
       payloadFunction
         ? payloadFunction(params, region)
         : params,
     );
 
-    return awsServiceClient[functionName](payload).promise();
+    const commandInstance = new Command(payload);
+    return awsServiceClient.send(commandInstance);
   };
 }
 

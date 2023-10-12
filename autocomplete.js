@@ -17,16 +17,14 @@ function getRegionLabel(regionId) {
   return foundRegion.regionLabel;
 }
 
-function autocompleteListFromAwsCall(listFuncName, pathToArray = "", pathToValue = "") {
+function autocompleteListFromAwsCall(Command, pathToArray = "", pathToValue = "") {
   return async (query, params, awsServiceClient) => {
-    if (!_.hasIn(awsServiceClient, listFuncName)) {
-      throw new Error(`Method "${listFuncName}" doesn't exist on service`);
-    }
-    const response = await awsServiceClient[listFuncName]().promise();
+    const response = await awsServiceClient.send(new Command());
 
     if (pathToArray !== "" && !_.has(response, pathToArray)) {
       throw new Error(`Path "${pathToArray}" doesn't exist on method call response`);
     }
+
     const autocompleteItems = (pathToArray === "" ? response : _.get(response, pathToArray))
       .map((object) => {
         if (pathToValue !== "" && (_.isArray(object) || !_.has(object, pathToValue))) {
