@@ -19,6 +19,7 @@ function readRegion(
   if (!silent) {
     console.info(`Region parameter not specified, using default value: "${consts.DEFAULT_REGION}"`);
   }
+
   return consts.DEFAULT_REGION;
 }
 
@@ -35,8 +36,10 @@ function readCredentials(
   }
 
   return {
-    accessKeyId: params[labels.ACCESS_KEY],
-    secretAccessKey: params[labels.SECRET_KEY],
+    credentials: {
+      accessKeyId: params[labels.ACCESS_KEY],
+      secretAccessKey: params[labels.SECRET_KEY],
+    },
     region: readRegion(params, labels.REGION),
   };
 }
@@ -78,10 +81,28 @@ function buildTagSpecification(resourceType, tags) {
   }];
 }
 
+const stripAwsResultOffMetadata = (result) => {
+  if (!_.isPlainObject(result) && !_.isArray(result)) {
+    return result;
+  }
+
+  if (_.isArray(result)) {
+    return result.map(stripAwsResultOffMetadata);
+  }
+
+  return Object.fromEntries(
+    Object
+      .entries(result)
+      .filter(([key]) => key !== "$metadata")
+      .map(([key, value]) => [key, stripAwsResultOffMetadata(value)]),
+  );
+};
+
 module.exports = {
   removeCredentials,
   removeUndefinedAndEmpty,
   readRegion,
   readCredentials,
   buildTagSpecification,
+  stripAwsResultOffMetadata,
 };
