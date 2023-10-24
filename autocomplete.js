@@ -17,9 +17,14 @@ function getRegionLabel(regionId) {
   return foundRegion.regionLabel;
 }
 
-function autocompleteListFromAwsCall(Command, pathToArray = "", pathToValue = "") {
+function autocompleteListFromAwsCall(
+  Command,
+  pathToArray = "",
+  pathToValue = "",
+  prepareCommandInput = () => ({}),
+) {
   return async (query, params, awsServiceClient) => {
-    const response = await awsServiceClient.send(new Command());
+    const response = await awsServiceClient.send(new Command(prepareCommandInput(params)));
 
     if (pathToArray !== "" && !_.has(response, pathToArray)) {
       throw new Error(`Path "${pathToArray}" doesn't exist on method call response`);
