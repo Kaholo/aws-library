@@ -30,7 +30,7 @@
     "@aws-crypto/sha256-js": "^5.2.0",
     "@aws-crypto/util": "^5.2.0",
     "@kaholo/plugin-library": "^2.4.0",
-    "@smithy/types": "^2.5.0",
+    "@smithy/types": "^2.4.0",
     "lodash": "4.17.21",
     "uuid": "^9.0.1"
   }
